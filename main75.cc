@@ -65,12 +65,12 @@ int main() {
       }
     }
 
-    // find the new resonance
+    // find the first new resonance at the parton level
     int iRes = 0;
     while (pythia.event[iRes].idAbs() != 4000001
 	   && pythia.event[iRes].idAbs() != 4000002
 	   && iRes < pythia.event.size()) iRes++;
-    // find her daughters
+    // find the last appearance of the new resonance found above
     while (pythia.event[iRes].daughter1() == pythia.event[iRes].daughter2()
 	   && iRes < pythia.event.size())
       iRes = pythia.event[iRes].daughter1();
@@ -81,6 +81,7 @@ int main() {
       continue;
     }
 
+    // index of daughters
     int iD1 = pythia.event[iRes].daughter1();
     int iD2 = pythia.event[iRes].daughter2();
 
@@ -100,6 +101,8 @@ int main() {
       if (!pythia.event[i].isFinal()) continue;
 
       // No neutrinos or DM.
+      // 12 for electron neutrino, 14 for muon neutrino, 16 for tauon neutrino, 52 for dark matter with spin 1 / 2
+      // Pdgid can be accessed in https://twiki.cern.ch/twiki/bin/view/Main/PdgId
       if ( pythia.event[i].idAbs() == 12 || pythia.event[i].idAbs() == 14
 	|| pythia.event[i].idAbs() == 16 || pythia.event[i].idAbs() == 52)
 	continue;
@@ -107,6 +110,7 @@ int main() {
       // Only |eta| < 3.6.
       //      if (abs(pythia.event[i].eta()) > 3.6) continue;
       // still don't know how to cut.
+      // put every particle into list?
 
       // Store as input to Fastjet.
       fjInputs.push_back( fastjet::PseudoJet( pythia.event[i].px(),
@@ -128,8 +132,9 @@ int main() {
     inclusiveJets = clustSeq.inclusive_jets(20.0);
     sortedJets    = sorted_by_pt(inclusiveJets);
 
-    if(sortedJets.size() < 1) {
-      cout << " No jets found in event " << iEvent << endl;
+    // need at least 2 jets to finish leading jet and sub-leading jet analysis
+    if(sortedJets.size() < 2) {
+      cout << " No enough jets found in event " << iEvent << endl;
       continue;
     }
 
