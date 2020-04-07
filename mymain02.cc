@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
   // set parameter for jet splitting
   double dR = 0.2;
 
-  int nEvent = 1;
+  int nEvent = 1000;
   double MassMax = 1000.;
   double pTMax = 1000.;
 
@@ -62,8 +62,8 @@ int main(int argc, char* argv[]) {
   TFile *outFile = new TFile("QCDProcess.root", "RECREATE");
 
   // Histograms of parton level
-  TH1F *HptD1 = new TH1F("HptD1", "pT of daughter 1", 100, 0., pTMax);
-  TH1F *HptD2 = new TH1F("HptD2", "pT of daughter 2", 100, 0., pTMax);
+  TH1F *HptD1 = new TH1F("HptD1", "pT of daughter 1", 100, 0., 5.);
+  TH1F *HptD2 = new TH1F("HptD2", "pT of daughter 2", 100, 0., 5.);
   TH1F *HetaD1 = new TH1F("HetaD1", "eta of daughter 1", 100, 0., 2.);
   TH1F *HetaD2 = new TH1F("HetaD2", "eta of daughter 2", 100, 0., 2.);
 
@@ -219,10 +219,12 @@ int main(int argc, char* argv[]) {
     double d21 = DeltaR(phi2, sortedJets[0].phi(), eta2, sortedJets[0].eta());
     double d12 = DeltaR(phi1, sortedJets[1].phi(), eta1, sortedJets[1].eta());
 
+    /*
     cout << "index: " << id11 << "\tpT: " << pythia.event[id11].pT() << "\teta: " << pythia.event[id11].eta() << "\tphi: " << pythia.event[id11].phi() << endl;
     cout << "index: " << id21 << "\tpT: " << pythia.event[id21].pT() << "\teta: " << pythia.event[id21].eta() << "\tphi: " << pythia.event[id11].phi() << endl;
     cout << "leading jet:\tpT: " << sortedJets[0].pt() << "\teta: " << sortedJets[0].eta() << "\tphi: " << sortedJets[0].phi() << endl;
     cout << "2-leading jet:\tpT: " << sortedJets[1].pt() << "\teta: " << sortedJets[1].eta() << "\tphi: " << sortedJets[1].phi() << endl;
+    */
 
     if ((d11 < dR && d22 < dR) || (d21 < dR && d12 < dR))
       HDijetType -> Fill(EventType);
