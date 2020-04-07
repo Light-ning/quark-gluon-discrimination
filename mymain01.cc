@@ -5,13 +5,23 @@
 
 // This is a simple test program to study jets in Dark Matter production.
 
+#include <iostream>
+
 #include "Pythia8/Pythia.h"
+
+// head file for jet clustering
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 
+// head file for ROOT histogram plotting
+#include "TH1.h"
+#include "TVirtualPad.h"
+#include "TApplication.h"
+#include "Tfile.h"
+
 using namespace Pythia8;
 
-int main() {
+int main(int argc, char* argv[]) {
 
   // Generator. Process selection. Initialization. Event shorthand.
   Pythia pythia;
@@ -34,24 +44,28 @@ int main() {
   double MassMax = 1000.;
   double pTMax = 1000.;
 
+  // settings for using ROOT histograms
+  TApplication theApp("hist", &argc, argv);
+  TFile *outFile = new TFile("MC301295.root", "RECREATE");
+
   // Histograms of parton level
-  Hist HMassR("Mass of new resonances", 100, 0., MassMax);
-  Hist HptR("pT of new resonances", 100, 0., pTMax);
-  Hist HptD1("pT of daughter 1", 100, 0., pTMax);
-  Hist HptD2("pT of daughter 2", 100, 0., pTMax);
-  Hist HetaR("eta of new resonances", 100, 0., 2.);
-  Hist HetaD1("eta of daughter 1", 100, 0., 2.);
-  Hist HetaD2("eta of daughter 2", 100, 0., 2.);
+  TH1F *HMassR = new TH1F("HMassR", "Mass of new resonances", 100, 0., MassMax);
+  TH1F *HptR = new TH1F("HptR", "pT of new resonances", 100, 0., pTMax);
+  TH1F *HptD1 = new TH1F("HptD1", "pT of daughter 1", 100, 0., pTMax);
+  TH1F *HptD2 = new TH1F("HptD2", "pT of daughter 2", 100, 0., pTMax);
+  TH1F *HetaR = new TH1F("HetaR", "eta of new resonances", 100, 0., 2.);
+  TH1F *HetaD1 = new TH1F("HetaD1", "eta of daughter 1", 100, 0., 2.);
+  TH1F *HetaD2 = new TH1F("HetaD2", "eta of daughter 2", 100, 0., 2.);
 
   // Histograms of particle level
-  Hist HMassC("Mass of dijet candidates", 100, 0., MassMax);
-  Hist HptC("pT of dijet candidates", 100, 0., pTMax);
-  Hist HptJ1("pT of leading jets", 100, 0, pTMax);
-  Hist HptJ2("pT of sub leading jets", 100, 0, pTMax);
-  Hist HetaC("eta of dijet candidates", 100, 0., 2.);
-  Hist HetaJ1("eta of leading jets", 100, 0., 2.);
-  Hist HetaJ2("eta of sub leading jets", 100, 0., 2.);
-  Hist HYstar("Ystar", 100, 0., 0.6);
+  TH1F *HMassC = new TH1F("HMassC", "Mass of dijet candidates", 100, 0., MassMax);
+  TH1F *HptC = new TH1F("HptC", "pT of dijet candidates", 100, 0., pTMax);
+  TH1F *HptJ1 = new TH1F("HptJ1", "pT of leading jets", 100, 0, pTMax);
+  TH1F *HptJ2 = new TH1F("HptJ2", "pT of sub leading jets", 100, 0, pTMax);
+  TH1F *HetaC = new TH1F("HetaC", "eta of dijet candidates", 100, 0., 2.);
+  TH1F *HetaJ1 = new TH1F("HetaJ1", "eta of leading jets", 100, 0., 2.);
+  TH1F *HetaJ2 = new TH1F("HetaJ2", "eta of sub leading jets", 100, 0., 2.);
+  TH1F *HYstar = new TH1F("HYstar", "Ystar", 100, 0., 0.6);
 
   int iErr = 0;
 
@@ -85,13 +99,13 @@ int main() {
     int iD1 = pythia.event[iRes].daughter1();
     int iD2 = pythia.event[iRes].daughter2();
 
-    HMassR.fill(pythia.event[iRes].m());
-    HptR.fill(pythia.event[iRes].p().pT());
-    HptD1.fill(pythia.event[iD1].p().pT());
-    HptD2.fill(pythia.event[iD2].p().pT());
-    HetaR.fill(pythia.event[iRes].p().eta());
-    HetaD1.fill(pythia.event[iD1].p().eta());
-    HetaD2.fill(pythia.event[iD2].p().eta());
+    HMassR -> Fill(pythia.event[iRes].m());
+    HptR -> Fill(pythia.event[iRes].p().pT());
+    HptD1 -> Fill(pythia.event[iD1].p().pT());
+    HptD2 -> Fill(pythia.event[iD2].p().pT());
+    HetaR -> Fill(pythia.event[iRes].p().eta());
+    HetaD1 -> Fill(pythia.event[iD1].p().eta());
+    HetaD2 -> Fill(pythia.event[iD2].p().eta());
 
     fjInputs.clear();
 
@@ -104,7 +118,7 @@ int main() {
       // 12 for electron neutrino, 14 for muon neutrino, 16 for tauon neutrino, 52 for dark matter with spin 1 / 2
       // Pdgid can be accessed in https://twiki.cern.ch/twiki/bin/view/Main/PdgId
       if ( pythia.event[i].idAbs() == 12 || pythia.event[i].idAbs() == 14
-	|| pythia.event[i].idAbs() == 16 || pythia.event[i].idAbs() == 52)
+	|| pythia.event[i].idAbs() == 16)
 	continue;
 
       // Only |eta| < 3.6.
@@ -151,23 +165,37 @@ int main() {
     // cut the events where jet eta or ystar is too large
     //    if (abs(etaC) >= 2 || abs(Ystar) >= 0.6) continue;
 
-    HMassC.fill(pC.mCalc());
-    HptC.fill(pC.pT());
-    HptJ1.fill(sortedJets[0].pt());
-    HptJ2.fill(sortedJets[1].pt());
-    HetaC.fill(pC.eta());
-    HetaJ1.fill(sortedJets[0].eta());
-    HetaJ2.fill(sortedJets[1].eta());
-    HYstar.fill(Ystar);
+    HMassC -> Fill(pC.mCalc());
+    HptC -> Fill(pC.pT());
+    HptJ1 -> Fill(sortedJets[0].pt());
+    HptJ2 -> Fill(sortedJets[1].pt());
+    HetaC -> Fill(pC.eta());
+    HetaJ1 -> Fill(sortedJets[0].eta());
+    HetaJ2 -> Fill(sortedJets[1].eta());
+    HYstar -> Fill(Ystar);
     
   // End of event loop. Statistics. Histogram.
   }
-  pythia.stat();
 
-  // parton level histogram
-  cout << HMassR << HptR << HptD1 << HptD2 << HetaR << HetaD1 << HetaD2 << endl;
-  // particle level histogram
-  cout << HMassC << HptC << HptJ1 << HptJ2 << HetaC << HetaJ1 << HetaJ2 << HYstar << endl;
+  HMassR -> Write();
+  HptR -> Write();
+  HptD1 -> Write();
+  HptD2 -> Write();
+  HetaR -> Write();
+  HetaD1 -> Write();
+  HetaD2 -> Write();
+
+  HMassC -> Write();
+  HptC -> Write();
+  HptJ1 -> Write();
+  HptJ2 -> Write();
+  HetaC -> Write();
+  HetaJ1 -> Write();
+  HetaJ2 -> Write();
+  HYstar -> Write();
+  
+  delete outFile;
+  pythia.stat();
 
   // Done.
   return 0;
