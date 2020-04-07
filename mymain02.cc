@@ -16,7 +16,6 @@
 
 // head file for ROOT histogram plotting
 #include "TH1.h"
-#include "TVirtualPad.h"
 #include "TApplication.h"
 #include "Tfile.h"
 
@@ -62,8 +61,8 @@ int main(int argc, char* argv[]) {
   TFile *outFile = new TFile("QCDProcess.root", "RECREATE");
 
   // Histograms of parton level
-  TH1F *HptD1 = new TH1F("HptD1", "pT of daughter 1", 100, 0., 5.);
-  TH1F *HptD2 = new TH1F("HptD2", "pT of daughter 2", 100, 0., 5.);
+  TH1F *HptD1 = new TH1F("HptD1", "pT of daughter 1", 100, 0., pTMax);
+  TH1F *HptD2 = new TH1F("HptD2", "pT of daughter 2", 100, 0., pTMax);
   TH1F *HetaD1 = new TH1F("HetaD1", "eta of daughter 1", 100, 0., 2.);
   TH1F *HetaD2 = new TH1F("HetaD2", "eta of daughter 2", 100, 0., 2.);
 
@@ -92,6 +91,7 @@ int main(int argc, char* argv[]) {
       }
     }
 
+    /*
     // find 2 protons
     int ip1 = 1, ip2 = 2;
     while (pythia.event[ip1].idAbs() != 2212 && ip1 < pythia.event.size()) ip2 = ++ip1;
@@ -119,11 +119,6 @@ int main(int argc, char* argv[]) {
     id11 = id11 + id12;
     id21 = id21 + id22;
 
-    HptD1  -> Fill(pythia.event[id11].pT());
-    HptD2  -> Fill(pythia.event[id21].pT());
-    HetaD1 -> Fill(pythia.event[id11].eta());
-    HetaD2 -> Fill(pythia.event[id21].eta());
-
     // different types of processes
     if  (pythia.event[id11].idAbs() <=  8 && pythia.event[id21].idAbs() <=  8)  EventType = 0;
     if  (pythia.event[id11].idAbs() == 21 && pythia.event[id21].idAbs() == 21)  EventType = 1;
@@ -138,13 +133,31 @@ int main(int argc, char* argv[]) {
     while (pythia.event[id21].daughter1() == pythia.event[id21].daughter2()
 	   && pythia.event[id21].daughter1() != 0)
       id21 = pythia.event[id21].daughter1();
+    */
+
+    // hard coding to find 2 partons before showering
+    int id11 = 5, id21 = 6;
+
+    // EventType: 0: qq, 1: gg, 2: qg, -1: others
+    int EventType = -1;
+
+    // different types of processes
+    if  (pythia.process[id11].idAbs() <=  8 && pythia.process[id21].idAbs() <=  8)  EventType = 0;
+    if  (pythia.process[id11].idAbs() == 21 && pythia.process[id21].idAbs() == 21)  EventType = 1;
+    if ((pythia.process[id11].idAbs() <=  8 && pythia.process[id21].idAbs() == 21)
+      ||(pythia.process[id11].idAbs() == 21 && pythia.process[id21].idAbs() <=  8)) EventType = 2;
+    
+    HptD1  -> Fill(pythia.process[id11].pT());
+    HptD2  -> Fill(pythia.process[id21].pT());
+    HetaD1 -> Fill(pythia.process[id11].eta());
+    HetaD2 -> Fill(pythia.process[id21].eta());
 
     // record the phi and eta of 2 daughters
     // for the use of dijet splitting
-    double phi1 = pythia.event[id11].phi();
-    double phi2 = pythia.event[id21].phi();
-    double eta1 = pythia.event[id11].eta();
-    double eta2 = pythia.event[id21].eta();
+    double phi1 = pythia.process[id11].phi();
+    double phi2 = pythia.process[id21].phi();
+    double eta1 = pythia.process[id11].eta();
+    double eta2 = pythia.process[id21].eta();
 
     fjInputs.clear();
 
