@@ -213,6 +213,18 @@ else
 	@echo "Error: $@ requires ROOT"
 endif
 
+# mymain02 using ROOT to plot histogram
+mymain02: $$@.cc $(PREFIX_LIB)/libpythia8.a
+ifeq ($(ROOT_USE),true)
+	$(CXX) $< -o $@ -w -I$(ROOT_INCLUDE) -I$(FASTJET3_INCLUDE) $(CXX_COMMON)\
+	 `$(ROOT_BIN)/root-config --cflags`\
+	 -L$(FASTJET3_LIB) -Wl,-rpath,$(FASTJET3_LIB) -lfastjet\
+	 -Wl,-rpath,$(ROOT_LIB) `$(ROOT_BIN)/root-config --glibs`
+	 $(GZIP_INC) $(GZIP_FLAGS)
+else
+	@echo "Error: $@ requires ROOT"
+endif
+
 # Internally used tests, without external dependencies.
 test% : test%.cc $(PREFIX_LIB)/libpythia8.a
 	$(CXX) $< -o $@ $(CXX_COMMON) $(GZIP_INC) $(GZIP_FLAGS)
