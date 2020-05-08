@@ -6,4 +6,4 @@
 
 Copy the codes to your `pythia8244/examples` to make the executable.
 
-**Note: The Makefile should be modified properly before run mymain0X.cc file**
+**Note: The Makefile should be modified properly before running mymain0X.cc file**
