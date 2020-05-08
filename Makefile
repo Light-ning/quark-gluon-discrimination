@@ -218,9 +218,14 @@ mymain02: $$@.cc $(PREFIX_LIB)/libpythia8.a
 ifeq ($(ROOT_USE),true)
 	$(CXX) $< -o $@ -w -I$(ROOT_INCLUDE) -I$(FASTJET3_INCLUDE) $(CXX_COMMON)\
 	 `$(ROOT_BIN)/root-config --cflags`\
+	 -Wl,-rpath,$(ROOT_LIB) `$(ROOT_BIN)/root-config --glibs`\
 	 -L$(FASTJET3_LIB) -Wl,-rpath,$(FASTJET3_LIB) -lfastjet\
-	 -Wl,-rpath,$(ROOT_LIB) `$(ROOT_BIN)/root-config --glibs`
+	 -lQCDAwarePlugin -lm -lfastjettools\
 	 $(GZIP_INC) $(GZIP_FLAGS)
+# command used to apply fastjet contrib QCDAwarePlugin
+# g++ -o example example.o -L. -lQCDAwarePlugin -lm -Wl,-rpath,/usr/local/lib -L/usr/local/lib -lfastjettools -lfastjet -lm
+
+
 else
 	@echo "Error: $@ requires ROOT"
 endif
