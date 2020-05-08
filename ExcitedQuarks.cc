@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
   // Generator. Process selection. Initialization. Event shorthand.
   Pythia pythia;
 
-  pythia.readFile("MC301295.cmnd");
+  pythia.readFile("MC301299.cmnd");
   pythia.init();
 
   // Fastjet analysis - select algorithm and parameters.
@@ -41,12 +41,12 @@ int main(int argc, char* argv[]) {
   std::vector <fastjet::PseudoJet> fjInputs;
 
   int nEvent = 1000;
-  double MassMax = 1000.;
-  double pTMax = 1000.;
+  double MassMax = 4000.;
+  double pTMax = 3000.;
 
   // settings for using ROOT histograms
   TApplication theApp("hist", &argc, argv);
-  TFile *outFile = new TFile("MC301295.root", "RECREATE");
+  TFile *outFile = new TFile("MC301299.root", "RECREATE");
 
   // Histograms of parton level
   TH1F *HMassR = new TH1F("HMassR", "Mass of new resonances", 100, 0., MassMax);
