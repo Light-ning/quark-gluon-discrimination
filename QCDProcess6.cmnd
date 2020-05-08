@@ -1,0 +1,3 @@
+HardQCD:all = on
+PhaseSpace:pTHatMin = 1500.
+PhaseSpace:pTHatMin = 2000.
