@@ -7,12 +7,15 @@
 
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 #include "Pythia8/Pythia.h"
 
 // head file for jet clustering
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
+#include "fastjet/contrib/DistanceMeasure.hh"
+#include "fastjet/contrib/QCDAwarePlugin.hh"
 
 // head file for ROOT histogram plotting
 #include "TH1.h"
@@ -35,7 +38,8 @@ int main(int argc, char* argv[]) {
   // Generator. Process selection. Initialization. Event shorthand.
   Pythia pythia;
 
-  pythia.readFile("QCDProcess.cmnd");
+  if (argc > 1) pythia.readFile(argv[1]);
+  else  pythia.readFile("QCDProcess.cmnd");
   pythia.init();
 
   // Fastjet analysis - select algorithm and parameters.
@@ -46,19 +50,32 @@ int main(int argc, char* argv[]) {
   jetDef = new fastjet::JetDefinition( fastjet::antikt_algorithm, Rparam,
            recombScheme, strategy);
 
+  // QCD - aware Fastjet analysis
+  double Ghostparam = 1e-20;
+  fastjet::contrib::QCDAwarePlugin::AntiKtMeasure *akt = new fastjet::contrib::QCDAwarePlugin::AntiKtMeasure(Rparam);
+  fastjet::contrib::QCDAwarePlugin::QCDAwarePlugin *qcdawareakt = new fastjet::contrib::QCDAwarePlugin::QCDAwarePlugin(akt);
+
   // Fastjet input.
-  std::vector <fastjet::PseudoJet> fjInputs;
+  std::vector <fastjet::PseudoJet> fjInputs, QCDfjInputs;
 
   // set parameter for jet splitting
   double dR = 0.2;
 
-  int nEvent = 1000;
-  double MassMax = 1000.;
-  double pTMax = 1000.;
+  int nEvent = 100000;
+  double MassMax = 10000.;
+  double pTMax = 5000.;
+
+  // output file with tried event number & cross section
+  ofstream information;
+  if (argc > 3) information.open(argv[3], ios::out);
+  else information.open("Info.txt", ios::out);
 
   // settings for using ROOT histograms
+  TFile *outFile;
+  if (argc > 2) outFile = new TFile(argv[2], "RECREATE");
+  else outFile = new TFile("QCDProcess.root", "RECREATE");
+
   TApplication theApp("hist", &argc, argv);
-  TFile *outFile = new TFile("QCDProcess.root", "RECREATE");
 
   // Histograms of parton level
   TH1F *HptD1 = new TH1F("HptD1", "pT of daughter 1", 100, 0., pTMax);
@@ -68,6 +85,11 @@ int main(int argc, char* argv[]) {
 
   // Histograms of particle level
   TH1F *HMassC = new TH1F("HMassC", "Mass of dijet candidates", 100, 0., MassMax);
+  TH1F *HMassCun= new TH1F("HMassCun", "Mass of unlabelled dijet candidates", 100., 0., MassMax);
+  TH1F *HMassCqq = new TH1F("HMassCqq", "Mass of qq dijet candidates", 100., 0., MassMax);
+  TH1F *HMassCgg = new TH1F("HMassCgg", "Mass of gg dijet candidates", 100., 0., MassMax);
+  TH1F *HMassCqg = new TH1F("HMassCqg", "Mass of qg dijet candidates", 100., 0., MassMax);
+  
   TH1F *HptC = new TH1F("HptC", "pT of dijet candidates", 100, 0., pTMax);
   TH1F *HptJ1 = new TH1F("HptJ1", "pT of leading jets", 100, 0, pTMax);
   TH1F *HptJ2 = new TH1F("HptJ2", "pT of sub leading jets", 100, 0, pTMax);
@@ -77,7 +99,7 @@ int main(int argc, char* argv[]) {
   TH1F *HYstar = new TH1F("HYstar", "Ystar", 100, 0., 0.6);
 
   // Histogram of dijet type
-  TH1F *HDijetType = new TH1F("HDijetType", "0: qq jets\t1: gg jets\t2: qg jets", 6, 0., 3.);
+  TH1F *HDijetType = new TH1F("HDijetType", "0: qq jets\t1: gg jets\t2: qg jets", 10, -2., 3.);
 
   int iErr = 0;
 
@@ -91,73 +113,13 @@ int main(int argc, char* argv[]) {
       }
     }
 
-    /*
-    // find 2 protons
-    int ip1 = 1, ip2 = 2;
-    while (pythia.event[ip1].idAbs() != 2212 && ip1 < pythia.event.size()) ip2 = ++ip1;
-    while (pythia.event[ip2].idAbs() != 2212 && ip2 < pythia.event.size()) ip2++;
-    if (ip1 >= pythia.event.size() || ip2 >= pythia.event.size()){
-      cout << "No enough protons in Event: " << iEvent << endl;
-      continue;
-    }
-
-    // find 2 daughters and confirm the event type
-    int id11 = pythia.event[ip1].daughter1();
-    int id12 = pythia.event[ip1].daughter2();
-    int id21 = pythia.event[ip2].daughter1();
-    int id22 = pythia.event[ip2].daughter2();
-
-    // EventType: 0: qq, 1: gg, 2: qg, -1: others
-    int EventType = -1;
-
-    if ((id11 == 0 && id12 == 0) || (id11 != 0 && id12 != 0)
-      ||(id21 == 0 && id22 == 0) || (id21 != 0 && id22 != 0)){
-      cout << "No QCD dijet process is generated in Event: " << iEvent << endl;
-      continue;
-    }
-
-    id11 = id11 + id12;
-    id21 = id21 + id22;
-
-    // different types of processes
-    if  (pythia.event[id11].idAbs() <=  8 && pythia.event[id21].idAbs() <=  8)  EventType = 0;
-    if  (pythia.event[id11].idAbs() == 21 && pythia.event[id21].idAbs() == 21)  EventType = 1;
-    if ((pythia.event[id11].idAbs() <=  8 && pythia.event[id21].idAbs() == 21)
-      ||(pythia.event[id11].idAbs() == 21 && pythia.event[id21].idAbs() <=  8)) EventType = 2;
-	
-    // find the last appearance of daughter 1
-    while (pythia.event[id11].daughter1() == pythia.event[id11].daughter2()
-	   && pythia.event[id11].daughter1() != 0)
-      id11 = pythia.event[id11].daughter1();
-    // find the last appearance fo daughter 2
-    while (pythia.event[id21].daughter1() == pythia.event[id21].daughter2()
-	   && pythia.event[id21].daughter1() != 0)
-      id21 = pythia.event[id21].daughter1();
-    */
-
     // hard coding to find 2 partons before showering
     int id11 = 5, id21 = 6;
 
-    // EventType: 0: qq, 1: gg, 2: qg, -1: others
-    int EventType = -1;
-
-    // different types of processes
-    if  (pythia.process[id11].idAbs() <=  8 && pythia.process[id21].idAbs() <=  8)  EventType = 0;
-    if  (pythia.process[id11].idAbs() == 21 && pythia.process[id21].idAbs() == 21)  EventType = 1;
-    if ((pythia.process[id11].idAbs() <=  8 && pythia.process[id21].idAbs() == 21)
-      ||(pythia.process[id11].idAbs() == 21 && pythia.process[id21].idAbs() <=  8)) EventType = 2;
-    
     HptD1  -> Fill(pythia.process[id11].pT());
     HptD2  -> Fill(pythia.process[id21].pT());
     HetaD1 -> Fill(pythia.process[id11].eta());
     HetaD2 -> Fill(pythia.process[id21].eta());
-
-    // record the phi and eta of 2 daughters
-    // for the use of dijet splitting
-    double phi1 = pythia.process[id11].phi();
-    double phi2 = pythia.process[id21].phi();
-    double eta1 = pythia.process[id11].eta();
-    double eta2 = pythia.process[id21].eta();
 
     fjInputs.clear();
 
@@ -191,7 +153,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Run Fastjet algorithm.
-    vector <fastjet::PseudoJet> inclusiveJets, sortedJets;
+    std::vector <fastjet::PseudoJet> inclusiveJets, sortedJets;
     fastjet::ClusterSequence clustSeq(fjInputs, *jetDef);
 
     // Extract inclusive jets sorted by pT (note minimum pT of 20.0 GeV).
@@ -199,14 +161,10 @@ int main(int argc, char* argv[]) {
     sortedJets    = sorted_by_pt(inclusiveJets);
 
     // need at least 2 jets to finish leading jet and sub-leading jet analysis
-    if(sortedJets.size() < 2) {
-      cout << " No enough jets found in event " << iEvent << endl;
+    if (sortedJets.size() < 2) {
+      cout << "No enough jets found in event " << iEvent << endl;
       continue;
     }
-
-    // cut the events where jets have too little pT
-    //    if (sortedJets[0].pt() <= 420 || sortedJets[1].pt() <= 150)
-    //      continue;
 
     Vec4 pJ1(sortedJets[0].px(), sortedJets[0].py(), sortedJets[0].pz(), sortedJets[0].e());
     Vec4 pJ2(sortedJets[1].px(), sortedJets[1].py(), sortedJets[1].pz(), sortedJets[1].e());
@@ -214,8 +172,17 @@ int main(int argc, char* argv[]) {
 
     double Ystar = (sortedJets[0].rap() - sortedJets[1].rap()) / 2;
 
-    // cut the events where jet eta or ystar is too large
-    //    if (abs(etaC) >= 2 || abs(Ystar) >= 0.6) continue;
+    // cut events with too soft leading jets and sub leading jets
+    if ((pJ1.pT() < 420) || (pJ2.pT() < 150)){
+      cout << "Jets too soft in event " << iEvent << endl;
+      continue;
+    }
+
+    // cut the events where jet eta is too large
+    if ((abs(pJ1.eta()) >= 2) || (abs(pJ2.eta()) >= 2)){
+      cout << "Jets with too large eta in event " << iEvent << endl;
+      continue;
+    }
 
     HMassC -> Fill(pC.mCalc());
     HptC -> Fill(pC.pT());
@@ -226,21 +193,172 @@ int main(int argc, char* argv[]) {
     HetaJ2 -> Fill(sortedJets[1].eta());
     HYstar -> Fill(Ystar);
 
-    // calculate distance between parton and jet
-    double d11 = DeltaR(phi1, sortedJets[0].phi(), eta1, sortedJets[0].eta());
-    double d22 = DeltaR(phi2, sortedJets[1].phi(), eta2, sortedJets[1].eta());
-    double d21 = DeltaR(phi2, sortedJets[0].phi(), eta2, sortedJets[0].eta());
-    double d12 = DeltaR(phi1, sortedJets[1].phi(), eta1, sortedJets[1].eta());
 
-    /*
-    cout << "index: " << id11 << "\tpT: " << pythia.event[id11].pT() << "\teta: " << pythia.event[id11].eta() << "\tphi: " << pythia.event[id11].phi() << endl;
-    cout << "index: " << id21 << "\tpT: " << pythia.event[id21].pT() << "\teta: " << pythia.event[id21].eta() << "\tphi: " << pythia.event[id11].phi() << endl;
-    cout << "leading jet:\tpT: " << sortedJets[0].pt() << "\teta: " << sortedJets[0].eta() << "\tphi: " << sortedJets[0].phi() << endl;
-    cout << "2-leading jet:\tpT: " << sortedJets[1].pt() << "\teta: " << sortedJets[1].eta() << "\tphi: " << sortedJets[1].phi() << endl;
+    // Qcdaware jet clustering
+
+    QCDfjInputs.clear();
+
+    // Particle loop to pick final partons
+    for (int i = 0; i < pythia.event.size(); i++){
+      // partons only
+      if (!pythia.event[i].isParton()) continue;
+      // no parton child
+      if (pythia.event[pythia.event[i].daughter1()].isParton() || pythia.event[pythia.event[i].daughter2()].isParton()) continue;
+      // reject if the parton is from hadron or tau decay
+      bool fromHorT = 0;
+      for (int mother: pythia.event[i].motherList()){
+	fromHorT = fromHorT || (pythia.event[mother].isHadron() && pythia.event[mother].statusHepMC() == 2);
+	fromHorT = fromHorT || ((pythia.event[mother].idAbs() == 15) && (pythia.event[mother].statusHepMC() == 2));
+      }
+      if (fromHorT) continue;
+
+      // put the selected parton in fastjet input vector
+      fastjet::PseudoJet FinalParton(pythia.event[i].px(), pythia.event[i].py(), pythia.event[i].pz(), pythia.event[i].e());
+      FinalParton.set_user_index(pythia.event[i].id());
+
+      QCDfjInputs.push_back(FinalParton);
+    }
+
+    // if no final partons
+    if (fjInputs.size() == 0){
+      cout << "Error: no final partons in event " << iEvent << endl;
+      HDijetType->Fill(-1);
+      HMassCun->Fill(pC.mCalc());
+      continue;
+    }
+
+    // QCD aware jet clustering
+    std::vector <fastjet::PseudoJet> QCDSortedJets;
+
+    fastjet::ClusterSequence QCDclustSeq(QCDfjInputs, qcdawareakt);
+    QCDSortedJets = sorted_by_pt(QCDclustSeq.inclusive_jets(20.0));
+
+    // no enough parton jets
+    if (QCDSortedJets.size() < 2){
+      cout << "No enough parton jets found in event" << iEvent << endl;
+      HDijetType->Fill(-1);
+      HMassCun->Fill(pC.mCalc());
+      continue;
+    }
+
+    // add "ghost" parton jet to the pseudojet list
+    // ghostify the parton jet
+    std::vector <fastjet::PseudoJet> refjInput;
+    refjInput.clear();
+    // default user index of pseudo jet is -1, the same as anti-down quark
+    // so set the user index of particle jet as 0
+    for (fastjet::PseudoJet particlejet: sortedJets){
+      particlejet.set_user_index(0);
+      refjInput.push_back(particlejet);
+    }
+    for (fastjet::PseudoJet partonjet: QCDSortedJets){
+      // ghostify
+      //      cout << "Partonjet:"
+      //	   << partonjet.eta() << " "
+      //	   << partonjet.phi() << " ";
+      partonjet.reset_momentum(partonjet.px() * Ghostparam, partonjet.py() * Ghostparam, partonjet.pz() * Ghostparam, partonjet.e() * Ghostparam);
+      //      cout << partonjet.pt() / Ghostparam << " "
+      //	   << partonjet.e() / Ghostparam << " "
+      //	   << partonjet.user_index() << " "
+      //	   << endl;
+      refjInput.push_back(partonjet);
+    }
+
+    // reclustering
+    fastjet::ClusterSequence reClustSeq(refjInput, *jetDef);
+    std::vector <fastjet::PseudoJet> reSortedJets;
+    reSortedJets = sorted_by_pt(reClustSeq.inclusive_jets(20.0));
+
+    // labelling
+    // pick the closest parton jets to label
+    // if the distance of all the parton constituents are larger than dR, the particle jet remain unlabelled
+    int EventType = -1;
+    double Rmin0 = dR, Rmin1 = dR;
+    int label0 = 0, label1 = 0;
+    for (fastjet::PseudoJet con: reSortedJets[0].constituents())
+      if (con.user_index() != 0)
+	if (DeltaR(reSortedJets[0].phi(), con.phi(), reSortedJets[0].eta(), con.eta()) < Rmin0){
+	  Rmin0 = DeltaR(reSortedJets[0].phi(), con.phi(), reSortedJets[0].eta(), con.eta());
+	  label0 = con.user_index();
+	}
+    for (fastjet::PseudoJet con: reSortedJets[1].constituents())
+      if (con.user_index() != 0)
+	if (DeltaR(reSortedJets[1].phi(), con.phi(), reSortedJets[1].eta(), con.eta()) < Rmin1){
+	  Rmin1 = DeltaR(reSortedJets[1].phi(), con.phi(), reSortedJets[1].eta(), con.eta());
+	  label1 = con.user_index();
+	}
+
+    // Delta R are all larger than dR
+    if ((label0 == 0) || (label1 == 0)){
+      HMassCun->Fill(pC.mCalc());
+      HDijetType->Fill(-1);
+      continue;
+    }
+    label0 = abs(label0);
+    label1 = abs(label1);
+
+    //    cout << "label0: " << label0 << " label1: " << label1 << endl;
+    //    cout << "daughter0: " << pythia.process[id11].id() << " daughter1: " << pythia.process[id21].id() << endl << endl;
+    
+    if ((label0 <= 8) && (label1 <= 8)){
+      HMassCqq->Fill(pC.mCalc());
+      HDijetType->Fill(0);
+    } else if ((label0 == 21) && (label1 == 21)){
+      HMassCgg->Fill(pC.mCalc());
+      HDijetType->Fill(1);
+    } else if (((label0 == 21) && (label1 <= 8)) ||
+	       ((label0 <= 8) && (label1 == 21))){
+      HMassCqg->Fill(pC.mCalc());
+      HDijetType->Fill(2);
+    } else {
+      HMassCun->Fill(pC.mCalc());
+      HDijetType->Fill(-1);
+    }
+
+    /*    
+    // old method
+    // truth matching below:
+    double phiJet1 = sortedJets[0].phi();
+    double phiJet2 = sortedJets[1].phi();
+    double etaJet1 = sortedJets[0].eta();
+    double etaJet2 = sortedJets[1].eta();
+
+    int ij1 = -1, ij2 = -1;
+    for (int iParticle = 0; iParticle < pythia.event.size(); iParticle++){
+      if ((pythia.event[iParticle].idAbs() != 21) && (pythia.event[iParticle].idAbs() > 8)) continue;
+      if (DeltaR(pythia.event[iParticle].phi(), phiJet1, pythia.event[iParticle].eta(), etaJet1) <= dR){
+	if (ij1 == -1) ij1 = iParticle;
+	else if (pythia.event[iParticle].e() > pythia.event[ij1].e()) ij1 = iParticle;
+      }
+      if (DeltaR(pythia.event[iParticle].phi(), phiJet2, pythia.event[iParticle].eta(), etaJet2) <= dR){
+	if (ij2 == -1) ij2 = iParticle;
+	else if (pythia.event[iParticle].e() > pythia.event[ij2].e()) ij2 = iParticle;
+      }
+    }
+
+    // the event type: unlabelled -> -1; qq -> 0; gg -> 1; qg -> 2
+    int EventType = -1;
+    if ((ij1 == ij2) || (ij1 == -1) || (ij2 == -1)) {
+      HMassCun -> Fill(pC.mCalc());
+      continue;
+    }
+    if ((pythia.event[ij1].idAbs() <=  8) && (pythia.event[ij2].idAbs() <=  8)){
+      EventType = 0;
+      HMassCqq -> Fill(pC.mCalc());
+    }
+    else if ((pythia.event[ij1].idAbs() == 21) && (pythia.event[ij2].idAbs() == 21)){
+      EventType = 1;
+      HMassCgg -> Fill(pC.mCalc());
+    }
+    else if (((pythia.event[ij1].idAbs() <=  8) && (pythia.event[ij2].idAbs() == 21)) ||
+	     ((pythia.event[ij1].idAbs() == 21) && (pythia.event[ij2].idAbs() <=  8))){
+      EventType = 2;
+      HMassCqg -> Fill(pC.mCalc());
+    }
+    else HMassCun -> Fill(pC.mCalc());
+
+    HDijetType -> Fill(EventType);
     */
-
-    if ((d11 < dR && d22 < dR) || (d21 < dR && d12 < dR))
-      HDijetType -> Fill(EventType);
 
     // End of event loop. Statistics. Histogram.
   }
@@ -251,6 +369,11 @@ int main(int argc, char* argv[]) {
   HetaD2 -> Write();
 
   HMassC -> Write();
+  HMassCun -> Write();
+  HMassCqq -> Write();
+  HMassCgg -> Write();
+  HMassCqg -> Write();
+  
   HptC -> Write();
   HptJ1 -> Write();
   HptJ2 -> Write();
@@ -260,6 +383,10 @@ int main(int argc, char* argv[]) {
   HYstar -> Write();
 
   HDijetType -> Write();
+
+  information << pythia.info.nTried() << endl
+	      << pythia.info.sigmaGen() << endl;
+  information.close();
   
   delete outFile;
   pythia.stat();
