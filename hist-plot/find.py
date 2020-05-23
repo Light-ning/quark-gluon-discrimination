@@ -22,7 +22,7 @@ def main(path, tags):
                         if not tag in g:
                             passed = False
                 if passed:
-                    fileList.append( os.path.join("outDirectort/",f,g) )
+                    fileList.append( os.path.join("outDirectory/",f,g) )
 
     fileList.sort()
     for i in fileList:
