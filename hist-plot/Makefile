@@ -8,6 +8,6 @@ all: $(target)
 
 outDirectory/%.root: $(path)%.root
 	@mkdir outDirectory
-	@mkdir ${$@%/*.root}
-	root -b -q "makingPlot(\"$<\", \"outTree\", \"$@\")"
+	@mkdir $(shell echo ${$@%/*.root})
+	@root -b -q "makingPlot(\"$<\", \"outTree\", \"$@\")"
 
