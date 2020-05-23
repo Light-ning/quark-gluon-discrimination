@@ -8,11 +8,11 @@ outDic=outDirectory/
 all: $(target)
 
 makingDic:
-	@mkdir $(outDic)
-	@mkdir $(dir $(target))
+	@mkdir -p $(outDic)
+	@mkdir -p $(dir $(target))
 
 $(outDic)%.root: $(path)%.root
-	@root -b -q "makingPlot(\"$<\", \"outTree\", \"$@\")"
+	@root -b -q "makingHist.C(\"$<\", \"outTree\", \"$@\")"
 
 clean:
 	@rm -rf $(outDic)
