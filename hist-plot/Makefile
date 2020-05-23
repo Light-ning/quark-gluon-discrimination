@@ -4,7 +4,7 @@ path=/eos/atlas/atlascerngroupdisk/phys-exotics/jdm/dibjet/FullRUN2/NewCleaningM
 
 .PHONY: all clean
 
-all: target
+all: $(target)
 
 outDirectory/%.root: $(path)%.root
 	@mkdir outDirectory
