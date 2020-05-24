@@ -16,6 +16,10 @@ void add() {
     TH1D* HistGGMjj;
     while(getline(infile,sLine))  {
         TFile *f2 = new TFile(sLine.c_str());
+	if (f2 == 0){
+	  cout << "No output file named " << infile << endl;
+	  continue;
+	}
         if(i==0){
             HistMjj = (TH1D*) f2->Get("HistMjj");
             HistLJetPt = (TH1D*) f2->Get("HistLJetPt");
