@@ -1,11 +1,11 @@
 bool EventLevelCuts(float leadingJetPt, float subLeadingJetPt, float yStar, float mjj);
-bool getQuarkSelection(float pt, float ntrack);
+//bool getQuarkSelection(float pt, float ntrack);
 bool getGluonSelection(float pt, float ntrack);
 
 double gluonTrackOffset = -7.55743;
 double gluonTrackSlope = 3.5915;
-double quarkTrackOffset = -7.55743;
-double quarkTrackSlope = 3.5915;
+//double quarkTrackOffset = -7.55743;
+//double quarkTrackSlope = 3.5915;
 
 //char infile[] = "user.bdong.17987685._000001.tree.root";
 //char intree[] = "outTree";
@@ -20,6 +20,7 @@ double binLowPtGeV[] = {15. ,20. ,25. ,35. ,45. ,55. ,70. ,85. ,100. ,116. ,134.
 
 void makingHist(string infile, string intree, string outfile){
 
+  // histograms of mjj, leading jet pt, sub leading jet pt
   TH1D *HistMjj = new TH1D("HistMjj", "HistMjj", sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
   HistMjj->GetXaxis()->SetTitle("m_{jj} [GeV]");
   HistMjj->Sumw2();
@@ -30,16 +31,25 @@ void makingHist(string infile, string intree, string outfile){
   HistMjj->GetXaxis()->SetTitle("Sub-leading Jet Pt [GeV]");
   HistSJetPt->Sumw2();
 
-  TH1D *HistQQMjj = new TH1D("HistQQMjj", "HistQQMjj", sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-  HistQQMjj->GetXaxis()->SetTitle("m_{jj} [GeV]");
-  HistQQMjj->Sumw2();
-  TH1D *HistQGMjj = new TH1D("HistQGMjj", "HistQGMjj", sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-  HistQGMjj->GetXaxis()->SetTitle("m_{jj} [GeV]");
-  HistQGMjj->Sumw2();
+  // histograms of mjj of gg, gj dijet events
+  // g jet is selection by function getGluonSelection()
   TH1D *HistGGMjj = new TH1D("HistGGMjj", "HistGGMjj", sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
   HistGGMjj->GetXaxis()->SetTitle("m_{jj} [GeV]");
   HistGGMjj->Sumw2();
+  TH1D *HistGJMjj = new TH1D("HistGJMjj", "HistGJMjj", sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
+  HistGJMjj->GetXaxis()->SetTitle("m_{jj} [GeV]");
+  HistGJMjj->Sumw2();
 
+  // histograms of mjj of qg, qq dijet events
+  // qg = gj - gg; qq = jj - gj
+  TH1D *HistQGMjj = new TH1D("HistQGMjj", "HistQGMjj", sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
+  HistQGMjj->GetXaxis()->SetTitle("m_{jj} [GeV]");
+  HistQGMjj->Sumw2();
+  TH1D *HistQQMjj = new TH1D("HistQQMjj", "HistQQMjj", sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
+  HistQQMjj->GetXaxis()->SetTitle("m_{jj} [GeV]");
+  HistQQMjj->Sumw2();
+
+  // fraction of gg/jj, qg/jj, qq/jj
   TH1D *HistQQFraction = new TH1D("HistQQFraction", "HistQQFraction", sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
   HistQQFraction->GetXaxis()->SetTitle("m_{jj} [GeV]");
   HistQQFraction->Sumw2();
@@ -50,16 +60,40 @@ void makingHist(string infile, string intree, string outfile){
   HistGGFraction->GetXaxis()->SetTitle("m_{jj} [GeV]");
   HistGGFraction->Sumw2();
 
-  
-  TFile *f = TFile::Open(infile.c_str());
-  TTree *t = (TTree*) f->Get(intree.c_str());
+  // histograms of numTrkPt500PV of q/g leading jet
+  TH1D *HistLNTrk = new TH1D("HistLNTrk", "HistLNTrk", 80, -0.5, 79.5);
+  HistLNTrk->GetXaxis()->SetTitle("N_{trk}");
+  HistLNTrk->Sumw2();
+  TH1D *HistQLNTrk = new TH1D("HistQLNTrk", "HistQLNTrk", 80, -0.5, 79.5);
+  HistQLNTrk->GetXaxis()->SetTitle("N_{trk}");
+  HistQLNTrk->Sumw2();
+  TH1D *HistGLNTrk = new TH1D("HistGLNTrk", "HistGLNTrk", 80, -0.5, 79.5);
+  HistGLNTrk->GetXaxis()->SetTitle("N_{trk}");
+  HistGLNTrk->Sumw2();
 
+  TFile *f = TFile::Open(infile.c_str(), "read");
+  TTree *t = (TTree*) f->Get(intree.c_str());
+  TH1D *h = (TH1D*) f->Get("cutflow_weighted");
+
+  if (t == 0){
+    cout << "No tree named" << intree << " in " << infile << endl;
+    return;
+  }
+  if (h == 0){
+    cout << "No hist named cutflow_weighted in " << infile << endl;
+    return;
+  }
+
+  // variables used
   vector<float> *jet_pt = 0, *jet_NumTrkPt500PV = 0;
   float mjj, weight, yStar;
   double w = 1, sampleEvents = 0;
 
-  sampleEvents = ((TH1D*)f->Get("cutflow_weighted"))->GetBinContent(1);
+  // sample Events, used to calculate weight
+  sampleEvents = h->GetBinContent(1);
 
+  // set the needed branch status and branch address
+  // to get variables from the ttree
   t->SetBranchStatus("*", 0);
   t->SetBranchStatus("mjj", 1);
   t->SetBranchStatus("weight", 1);
@@ -73,26 +107,38 @@ void makingHist(string infile, string intree, string outfile){
   t->SetBranchAddress("jet_NumTrkPt500PV", &jet_NumTrkPt500PV);
   t->SetBranchAddress("yStar", &yStar);
 
+  // loop all the entries in the ttree
   int nEntries = t->GetEntries();
+
   for (int i = 0; i < nEntries; i++){
     t->GetEntry(i);
 
+    // set cut for events
     if (not EventLevelCuts((*jet_pt)[0], (*jet_pt)[1], yStar, mjj)) continue;
     
+    // calculate weight
+    // and fill mjj, leading jet pt, sub leading jet pt and ntrack hist
     w = weight / sampleEvents;
     HistMjj->Fill(mjj, w);
     HistLJetPt->Fill((*jet_pt)[0], w);
     HistSJetPt->Fill((*jet_pt)[1], w);
+    HistLNTrk->Fill((*jet_NumTrkPt500PV)[0], w);
 
-    bool quarkQuarkEvent = 0, quarkGluonEvent = 0, gluonGluonEvent = 0;
-    quarkQuarkEvent = getQuarkSelection((*jet_pt)[0], (*jet_NumTrkPt500PV)[0]) and getQuarkSelection((*jet_pt)[1], (*jet_NumTrkPt500PV)[1]);
-    gluonGluonEvent = getGluonSelection((*jet_pt)[0], (*jet_NumTrkPt500PV)[0]) and getGluonSelection((*jet_pt)[1], (*jet_NumTrkPt500PV)[1]);
-    quarkGluonEvent = (getQuarkSelection((*jet_pt)[0], (*jet_NumTrkPt500PV)[0]) and getGluonSelection((*jet_pt)[1], (*jet_NumTrkPt500PV)[1])) || (getQuarkSelection((*jet_pt)[1], (*jet_NumTrkPt500PV)[1]) && getGluonSelection((*jet_pt)[0], (*jet_NumTrkPt500PV)[0]));
+    // leading jet q/g selection
+    int GLeadingJet = 0;
+    GLeadingJet = getGluonSelection((*jet_pt)[0], (*jet_NumTrkPt500PV)[0]);
+    if (GLeadingJet) HistGLNTrk->Fill((*jet_NumTrkPt500PV)[0], w);
+    else HistQLNTrk->Fill((*jet_NumTrkPt500PV)[0], w);
 
-    if (quarkQuarkEvent) HistQQMjj->Fill(mjj, w);
-    if (quarkGluonEvent) HistQGMjj->Fill(mjj, w);
-    if (gluonGluonEvent) HistGGMjj->Fill(mjj, w);
+    // dijet gg/gj/jj selection
+    int numberGJet = 0;
+    numberGJet = GLeadingJet + getGluonSelection((*jet_pt)[1], (*jet_NumTrkPt500PV)[1]);
 
+    if (numberGJet == 2) {HistGGMjj->Fill(mjj, w); HistGGFraction->Fill(mjj, w);}
+    if (numberGJet >= 1) HistGJMjj->Fill(mjj, w);
+
+    if (numberGJet == 1) {HistQGMjj->Fill(mjj, w); HistQGFraction->Fill(mjj, w);}
+    if (numberGJet == 0) {HistQQMjj->Fill(mjj, w); HistQQFraction->Fill(mjj, w);}
   }
 
   f->Close();
@@ -100,10 +146,9 @@ void makingHist(string infile, string intree, string outfile){
   HistQQMjj->SetLineColor(kBlue);
   HistGGMjj->SetLineColor(kRed);
   HistQGMjj->SetLineColor(kGreen);
-
-  *HistQQFraction = *HistQQMjj;
-  *HistQGFraction = *HistQGMjj;
-  *HistGGFraction = *HistGGMjj;
+  HistQQFraction->SetLineColor(kBlue);
+  HistGGFraction->SetLineColor(kRed);
+  HistQGFraction->SetLineColor(kGreen);
 
   HistQQFraction->Divide(HistMjj);
   HistQGFraction->Divide(HistMjj);
@@ -113,22 +158,31 @@ void makingHist(string infile, string intree, string outfile){
   HistMjj->Write();
   HistLJetPt->Write();
   HistSJetPt->Write();
+  HistLNTrk->Write();
+
+  HistQLNTrk->Write();
+  HistGLNTrk->Write();
   
+  HistGGMjj->Write();
+  HistGJMjj->Write();
   HistQQMjj->Write();
   HistQGMjj->Write();
-  HistGGMjj->Write();
+
+  HistGGFraction->Write();
+  HistQQFraction->Write();
+  HistQGFraction->Write();    
 
   fout->Close();
-
 }
 
-bool getQuarkSelection(float pt, float ntrack){
+// we just apply gluon seleciton here
+//bool getQuarkSelection(float pt, float ntrack){
   // Q = 1, G = 0
-  double value = log(pt);
-  double SigmoidnTrack = quarkTrackSlope * value + quarkTrackOffset;
-  if (ntrack < SigmoidnTrack) return 1;
-  else return 0;
-}
+//  double value = log(pt);
+//  double SigmoidnTrack = quarkTrackSlope * value + quarkTrackOffset;
+//  if (ntrack < SigmoidnTrack) return 1;
+//  else return 0;
+//}
 
 bool getGluonSelection(float pt, float ntrack){
   // G = 1, Q = 0
