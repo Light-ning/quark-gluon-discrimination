@@ -1,5 +1,3 @@
-#!/bin/bash
-
 /usr/bin/time -o timelog.MC16a.JZ1W root -b -q "makingHist.C(\"MC16a_JZ1W\", \"outTree\")" >& log.MC16a.JZ1W &
 /usr/bin/time -o timelog.MC16a.JZ2W root -b -q "makingHist.C(\"MC16a_JZ2W\", \"outTree\")" >& log.MC16a.JZ2W &
 /usr/bin/time -o timelog.MC16a.JZ3W root -b -q "makingHist.C(\"MC16a_JZ3W\", \"outTree\")" >& log.MC16a.JZ3W &
