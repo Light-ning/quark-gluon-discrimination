@@ -74,7 +74,6 @@ void makingHist(TString dataset, TString intree){
   TString filename = gSystem->GetDirEntry(dir);
   while (filename != ""){
 
-    cout << inputPath + filename << endl;
     if (!filename.Contains(".root")){
       filename = gSystem->GetDirEntry(dir);
       continue;
@@ -110,13 +109,9 @@ void makingHist(TString dataset, TString intree){
       for (int i = 0; i < nEntries; i++){
 	t->GetEntry(i);
 
-	cout << i << "entry in file" << filename << endl;
-
 	// set cut for events
 	if (not EventLevelCuts((*jet_pt)[0], (*jet_pt)[1], yStar, mjj)) continue;
 
-	cout << i << "entry after cut in file" << filename << endl;
-    
 	// calculate weight
 	// and fill mjj, leading jet pt, sub leading jet pt and ntrack hist
 	w = weight / sampleEvents;
