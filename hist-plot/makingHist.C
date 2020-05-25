@@ -51,17 +51,6 @@ void makingHist(TString dataset, TString intree){
   HistQQMjj->GetXaxis()->SetTitle("m_{jj} [GeV]");
   HistQQMjj->Sumw2();
 
-  // fraction of gg/jj, qg/jj, qq/jj
-  TH1D *HistQQFraction = new TH1D("HistQQFraction", "HistQQFraction", sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-  HistQQFraction->GetXaxis()->SetTitle("m_{jj} [GeV]");
-  HistQQFraction->Sumw2();
-  TH1D *HistQGFraction = new TH1D("HistQGFraction", "HistQGFraction", sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-  HistQGFraction->GetXaxis()->SetTitle("m_{jj} [GeV]");
-  HistQGFraction->Sumw2();
-  TH1D *HistGGFraction = new TH1D("HistGGFraction", "HistGGFraction", sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-  HistGGFraction->GetXaxis()->SetTitle("m_{jj} [GeV]");
-  HistGGFraction->Sumw2();
-
   // histograms of numTrkPt500PV of q/g leading jet
   TH1D *HistLNTrk = new TH1D("HistLNTrk", "HistLNTrk", 80, -0.5, 79.5);
   HistLNTrk->GetXaxis()->SetTitle("N_{trk}");
@@ -136,11 +125,11 @@ void makingHist(TString dataset, TString intree){
 	int numberGJet = 0;
 	numberGJet = GLeadingJet + getGluonSelection((*jet_pt)[1], (*jet_NumTrkPt500PV)[1]);
 
-	if (numberGJet == 2) {HistGGMjj->Fill(mjj, w); HistGGFraction->Fill(mjj, w);}
+	if (numberGJet == 2) HistGGMjj->Fill(mjj, w);
 	if (numberGJet >= 1) HistGJMjj->Fill(mjj, w);
 	
-	if (numberGJet == 1) {HistQGMjj->Fill(mjj, w); HistQGFraction->Fill(mjj, w);}
-	if (numberGJet == 0) {HistQQMjj->Fill(mjj, w); HistQQFraction->Fill(mjj, w);}
+	if (numberGJet == 1) HistQGMjj->Fill(mjj, w);
+	if (numberGJet == 0) HistQQMjj->Fill(mjj, w);
       }
     } else cout << "No " << intree << "or no cutflow_weighted" << endl;
 
@@ -162,10 +151,6 @@ void makingHist(TString dataset, TString intree){
   HistGJMjj->Write();
   HistQQMjj->Write();
   HistQGMjj->Write();
-
-  HistGGFraction->Write();
-  HistQQFraction->Write();
-  HistQGFraction->Write();    
 
   fout->Close();
 }
