@@ -74,8 +74,14 @@ void makingHist(TString dataset, TString intree){
   TString filename = gSystem->GetDirEntry(dir);
   while (filename != ""){
 
+    cout << inputPath + filename << endl;
+    if (!filename.Contains(".root")){
+      filename = gSystem->GetDirEntry(dir);
+      continue;
+    }
+
     TFile *f = TFile::Open(inputPath + filename);
-    TTree *t = (TTree*) f->Get(intree.c_str());
+    TTree *t = (TTree*) f->Get(intree);
     TH1D *h = (TH1D*) f->Get("cutflow_weighted");
 
     if ((t != 0) && (h != 0)){
@@ -104,8 +110,12 @@ void makingHist(TString dataset, TString intree){
       for (int i = 0; i < nEntries; i++){
 	t->GetEntry(i);
 
+	cout << i << "entry in file" << filename << endl;
+
 	// set cut for events
 	if (not EventLevelCuts((*jet_pt)[0], (*jet_pt)[1], yStar, mjj)) continue;
+
+	cout << i << "entry after cut in file" << filename << endl;
     
 	// calculate weight
 	// and fill mjj, leading jet pt, sub leading jet pt and ntrack hist
@@ -131,14 +141,14 @@ void makingHist(TString dataset, TString intree){
 	if (numberGJet == 1) HistQGMjj->Fill(mjj, w);
 	if (numberGJet == 0) HistQQMjj->Fill(mjj, w);
       }
-    } else cout << "No " << intree << "or no cutflow_weighted" << endl;
+    } else cout << "No " << intree << " or no cutflow_weighted" << endl;
 
     f->Close();
     delete f, t, h;
     filename = gSystem->GetDirEntry(dir);
   }
 
-  TFile *fout = TFile::Open(outfile.c_str(), "recreate");
+  TFile *fout = TFile::Open(dataset + ".out.root", "recreate");
   HistMjj->Write();
   HistLJetPt->Write();
   HistSJetPt->Write();
@@ -187,14 +197,14 @@ TString getInputPath(TString dataset){
     return inputPath;
   }
   if (dataset.Contains("MC16")){
-    char period = dataset(dataset.Index("MC16") + 4);
-    if !(dataset.Contains("JZ") && dataset.Contains("W")){
+    TString period = dataset(dataset.Index("MC16") + 4);
+    if (!(dataset.Contains("JZ") && dataset.Contains("W"))){
       cout << "Wrong dataset tag: " << dataset << endl;
       return "";
     }
     TString jzxw = dataset(dataset.Index("JZ") + 2, dataset.Index("W") - dataset.Index("JZ") - 2);
     inputPath += "QCD_MC16" + period;
-    inputPath += "/user.bdong.mc16_13TeV.3647" + ((jzxw.size() == 1) ? ("0" + jzxw) : (jzxw)) + ".Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ" + jzxw + "WithSW.mc16" + period + "_newJetCleaning_May9_tree.root/";
+    inputPath += "/user.bdong.mc16_13TeV.3647" + ((jzxw.Length() == 1) ? ("0" + jzxw) : (jzxw)) + ".Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ" + jzxw + "WithSW.mc16" + period + "_newJetCleaning_May9_tree.root/";
   }
   return inputPath;
 }
