@@ -9,13 +9,14 @@ float LJetPt = 420.;
 float SJetPt = 150.;
 float yStarMax = 0.6;
 float mjjMin = 1100;
+string trigger = "HLT_j420";
 
 double gluonTrackOffset = -7.55743;
 double gluonTrackSlope = 3.5915;
 //double quarkTrackOffset = -7.55743;
 //double quarkTrackSlope = 3.5915;
 
-bool Cuts(float leadingJetPt, float subLeadingJetPt, float yStar, float mjj);
+bool Cuts(float leadingJetPt, float subLeadingJetPt, float yStar, float mjj, vector<string> *passedTriggers);
 //bool getQuarkSelection(float pt, float ntrack);
 bool getGluonSelection(float pt, float ntrack);
 TString getInputPath(TString dateset);
@@ -67,6 +68,7 @@ void makingHist(TString dataset, TString intree){
   // variables used
   vector<float> *jet_pt = 0, *jet_NumTrkPt500PV = 0;
   vector<int> *jet_PartonTruthLabelID = 0;
+  vector<string> *passedTriggers = 0;
   float mjj, weight, yStar;
   double w = 1, sampleEvents = 0;
 
@@ -100,6 +102,7 @@ void makingHist(TString dataset, TString intree){
       t->SetBranchStatus("jet_NumTrkPt500PV", 1);
       t->SetBranchStatus("yStar", 1);
       t->SetBranchStatus("jet_PartonTruthLabelID", 1);
+      t->SetBranchStatus("passedTriggers", 1);
 
       t->SetBranchAddress("mjj", &mjj);
       t->SetBranchAddress("weight", &weight);
@@ -107,6 +110,7 @@ void makingHist(TString dataset, TString intree){
       t->SetBranchAddress("jet_NumTrkPt500PV", &jet_NumTrkPt500PV);
       t->SetBranchAddress("yStar", &yStar);
       t->SetBranchAddress("jet_PartonTruthLabelID", &jet_PartonTruthLabelID);
+      t->SetBranchAddress("passedTriggers", &passedTriggers);
 
       // loop all the entries in the ttree
       int nEntries = t->GetEntries();
@@ -236,11 +240,13 @@ bool getGluonSelection(float pt, float ntrack){
   else return 0;
 }
 
-bool Cuts(float leadingJetPt, float subLeadingJetPt, float yStar, float mjj){
+bool Cuts(float leadingJetPt, float subLeadingJetPt, float yStar, float mjj, vector<string> *passedTriggers){
   if (leadingJetPt < LJetPt) return 0;
   if (subLeadingJetPt < SJetPt) return 0;
   if (abs(yStar) > yStarMax) return 0;
   if (mjj < mjjMin) return 0;
+  vector<string>::iterator location = find(passedTriggers->begin(), passedTriggers->end(), trigger);
+  if ((location - passedTriggers->begin()) >= passedTriggers->size()) return 0;
   return 1;
 }
 
