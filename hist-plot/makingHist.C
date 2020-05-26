@@ -119,7 +119,7 @@ void makingHist(TString dataset, TString intree){
 	t->GetEntry(i);
 
 	// set cut for events
-	if (not Cuts((*jet_pt)[0], (*jet_pt)[1], yStar, mjj)) continue;
+	if (not Cuts((*jet_pt)[0], (*jet_pt)[1], yStar, mjj, passedTriggers)) continue;
 
 	// calculate weight
 	// and fill mjj, leading jet pt, sub leading jet pt and ntrack hist
