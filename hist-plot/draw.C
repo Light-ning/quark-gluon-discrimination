@@ -51,7 +51,7 @@ void draw(TString root_file) {
     HistMjj_TruthQQ->Draw("same");
     mtlegend->AddEntry(HistMjj_TruthQQ, "TruthQQ", "l");
     mtlegend->Draw();
-    c->SaveAs(root_file + "mjjt.png");
+    c->SaveAs(root_file + ".mjjt.png");
     
     auto mlegend = new TLegend(0.8, 0.28, 0.89, 0.75);
     HistMjj->SetAxisRange(400., 12000.,"X");
@@ -68,7 +68,7 @@ void draw(TString root_file) {
     HistMjj_QQ->Draw("same");
     mlegend->AddEntry(HistMjj_QQ, "QQ", "l");
     mlegend->Draw();
-    c->SaveAs(root_file + "mjj.png");
+    c->SaveAs(root_file + ".mjj.png");
     
     auto lpttlegend = new TLegend(0.8, 0.28, 0.89, 0.75);
     HistLeadingJetPt->SetAxisRange(400., 8200.,"X");
@@ -85,7 +85,7 @@ void draw(TString root_file) {
     HistLeadingJetPt_TruthQQ->Draw("same");
     lpttlegend->AddEntry(HistLeadingJetPt_TruthQQ, "TruthQQ", "l");
     lpttlegend->Draw();
-    c->SaveAs(root_file + "LPtt.png");
+    c->SaveAs(root_file + ".LPtt.png");
     
     auto lptlegend = new TLegend(0.8, 0.28, 0.89, 0.75);
     HistLeadingJetPt->SetAxisRange(400., 8200.,"X");
@@ -102,7 +102,7 @@ void draw(TString root_file) {
     HistLeadingJetPt_QQ->Draw("same");
     lptlegend->AddEntry(HistLeadingJetPt_QQ, "QQ", "l");
     lptlegend->Draw();
-    c->SaveAs(root_file + "LPt.png");
+    c->SaveAs(root_file + ".LPt.png");
     
     auto spttlegend = new TLegend(0.8, 0.28, 0.89, 0.75);
     HistSubJetPt->SetAxisRange(400., 8200.,"X");
@@ -119,7 +119,7 @@ void draw(TString root_file) {
     HistSubJetPt_TruthQQ->Draw("same");
     spttlegend->AddEntry(HistSubJetPt_TruthQQ, "TruthQQ", "l");
     spttlegend->Draw();
-    c->SaveAs(root_file + "SPtt.png");
+    c->SaveAs(root_file + ".SPtt.png");
     
     auto sptlegend = new TLegend(0.8, 0.28, 0.89, 0.75);
     HistSubJetPt->SetAxisRange(400., 8200.,"X");
@@ -136,7 +136,7 @@ void draw(TString root_file) {
     HistSubJetPt_QQ->Draw("same");
     sptlegend->AddEntry(HistSubJetPt_QQ, "QQ", "l");
     sptlegend->Draw();
-    c->SaveAs(root_file + "SPt.png");
+    c->SaveAs(root_file + ".SPt.png");
 
     auto trklegend = new TLegend(0.83, 0.38, 0.89, 0.75);
     HistNTrk->SetAxisRange(-10., 100.,"X");
@@ -150,6 +150,6 @@ void draw(TString root_file) {
     HistNTrk_Q->Draw("same");
     trklegend->AddEntry(HistNTrk_Q, "Q", "l");
     trklegend->Draw();
-    c->SaveAs(root_file + "NTrk.png");
+    c->SaveAs(root_file + ".NTrk.png");
 
 }
