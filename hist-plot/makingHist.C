@@ -160,22 +160,22 @@ void makingHist(TString dataset, TString intree){
 	numberGJet = getGluonSelection((*jet_pt)[0], (*jet_NumTrkPt500PV)[0]) + getGluonSelection((*jet_pt)[1], (*jet_NumTrkPt500PV)[1]);
 
 	if (numberGJet >= 1){
-	  HistMjj_GG->Fill(mjj, w);
-	  HistLeadingJetPt_GG->Fill((*jet_pt)[0], w);
-	  HistSubJetPt_GG->Fill((*jet_pt)[1], w);
+	  HistMjj_GJ->Fill(mjj, w);
+	  HistLeadingJetPt_GJ->Fill((*jet_pt)[0], w);
+	  HistSubJetPt_GJ->Fill((*jet_pt)[1], w);
 	}
 	if (numberGJet == 2){
 	  HistMjj_GG->Fill(mjj, w);
 	  HistLeadingJetPt_GG->Fill((*jet_pt)[0], w);
 	  HistSubJetPt_GG->Fill((*jet_pt)[1], w);
 	} else if (numberGJet == 1){
-	  HistMjj_GG->Fill(mjj, w);
-	  HistLeadingJetPt_GG->Fill((*jet_pt)[0], w);
-	  HistSubJetPt_GG->Fill((*jet_pt)[1], w);
+	  HistMjj_QG->Fill(mjj, w);
+	  HistLeadingJetPt_QG->Fill((*jet_pt)[0], w);
+	  HistSubJetPt_QG->Fill((*jet_pt)[1], w);
 	} else if (numberGJet == 0){
-	  HistMjj_GG->Fill(mjj, w);
-	  HistLeadingJetPt_GG->Fill((*jet_pt)[0], w);
-	  HistSubJetPt_GG->Fill((*jet_pt)[1], w);
+	  HistMjj_QQ->Fill(mjj, w);
+	  HistLeadingJetPt_QQ->Fill((*jet_pt)[0], w);
+	  HistSubJetPt_QQ->Fill((*jet_pt)[1], w);
 	}
       }
     } else cout << "No " << intree << " or no cutflow_weighted" << endl;
