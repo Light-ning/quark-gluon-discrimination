@@ -78,5 +78,5 @@ void drawpt(TString root_lists, TString root_file) {
     HistLJetPt->SetLineColor(1);
     HistLJetPt->Draw("same");
     legend->Draw();
-    c->SaveAs("pt.pdf");
+    c->SaveAs(root_file + "pt.png");
 }
