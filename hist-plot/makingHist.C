@@ -169,7 +169,7 @@ void makingHist(TString dataset, TString intree){
 	  HistLeadingJetPt_GG->Fill((*jet_pt)[0], w);
 	  HistSubJetPt_GG->Fill((*jet_pt)[1], w);
 	} else if (numberGJet == 0){
-	  nHistMjj_GG->Fill(mjj, w);
+	  HistMjj_GG->Fill(mjj, w);
 	  HistLeadingJetPt_GG->Fill((*jet_pt)[0], w);
 	  HistSubJetPt_GG->Fill((*jet_pt)[1], w);
 	}
@@ -265,21 +265,21 @@ TString getInputPath(TString dataset){
 
 TH1D *getMassHist(TString name, TString title){
   TH1D *massHist = new TH1D(name, title, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-  massHist->GetXaxis->SetTitle("m_{jj} [GeV]");
+  massHist->GetXaxis()->SetTitle("m_{jj} [GeV]");
   massHist->Sumw2();
   return massHist;
 }
 
 TH1D *getPtHist(TString name, TString title){
   TH1D *ptHist = new TH1D(name, title, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-  ptHist->GetXaxis->SetTitle("Pt [GeV]");
+  ptHist->GetXaxis()->SetTitle("Pt [GeV]");
   ptHist->Sumw2();
   return ptHist;
 }
 
 TH1D *getNTrkHist(TString name, TString title){
   TH1D *nTrkHist = new TH1D(name, title, 80, -0.5, 79.5);
-  nTrkHist->GetXaxis->SetTitle("N_{track}");
+  nTrkHist->GetXaxis()->SetTitle("N_{track}");
   nTrkHist->Sumw2();
   return nTrkHist;
 }
