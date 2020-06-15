@@ -7,6 +7,7 @@ TString path = "/eos/atlas/atlascerngroupdisk/phys-exotics/jdm/dibjet/FullRUN2/N
 
 float LJetPt = 420.;
 float SJetPt = 150.;
+float etaMax = 2.1;
 float yStarMax = 0.6;
 float mjjMin = 1100;
 string trigger = "HLT_j420";
@@ -16,7 +17,7 @@ double gluonTrackSlope = 3.5915;
 //double quarkTrackOffset = -7.55743;
 //double quarkTrackSlope = 3.5915;
 
-bool Cuts(float leadingJetPt, float subLeadingJetPt, float yStar, float mjj, vector<string> *passedTriggers);
+bool Cuts(int njet, float leadingJetPt, float subLeadingJetPt, vector<string> *passedTriggers, float LooseBad, float eta, float yStar, float mjj);
 //bool getQuarkSelection(float pt, float ntrack);
 bool getGluonSelection(float pt, float ntrack);
 TString getInputPath(TString dateset);
@@ -69,7 +70,8 @@ void makingHist(TString dataset, TString intree){
   vector<float> *jet_pt = 0, *jet_NumTrkPt500PV = 0;
   vector<int> *jet_PartonTruthLabelID = 0;
   vector<string> *passedTriggers = 0;
-  float mjj, weight, yStar;
+  int njet;
+  float mjj, weight, yStar, LooseBad, eta;
   double w = 1, sampleEvents = 0;
 
   TString inputPath = getInputPath(dataset);
@@ -103,6 +105,9 @@ void makingHist(TString dataset, TString intree){
       t->SetBranchStatus("yStar", 1);
       t->SetBranchStatus("jet_PartonTruthLabelID", 1);
       t->SetBranchStatus("passedTriggers", 1);
+      t->SetBranchStatus("njet", 1);
+      t->SetBranchStatus("eta", 1);
+      t->SetBranchStatus("jet_clean_passLooseBad", 1);
 
       t->SetBranchAddress("mjj", &mjj);
       t->SetBranchAddress("weight", &weight);
@@ -111,6 +116,9 @@ void makingHist(TString dataset, TString intree){
       t->SetBranchAddress("yStar", &yStar);
       t->SetBranchAddress("jet_PartonTruthLabelID", &jet_PartonTruthLabelID);
       t->SetBranchAddress("passedTriggers", &passedTriggers);
+      t->SetBranchAddress("njet", &njet);
+      t->SetBranchAddress("eta", &eta);
+      t->SetBranchAddress("jet_clean_passLooseBad", &LooseBad);
 
       // loop all the entries in the ttree
       int nEntries = t->GetEntries();
@@ -240,13 +248,16 @@ bool getGluonSelection(float pt, float ntrack){
   else return 0;
 }
 
-bool Cuts(float leadingJetPt, float subLeadingJetPt, float yStar, float mjj, vector<string> *passedTriggers){
+bool Cuts(int njet, float leadingJetPt, float subLeadingJetPt, vector<string> *passedTriggers, float LooseBad, float eta, float yStar, float mjj){
+  if (njet < 2) return 0;
+  if (subLeadingJetPt <= SJetPt) return 0;
   if (leadingJetPt < LJetPt) return 0;
-  if (subLeadingJetPt < SJetPt) return 0;
-  if (abs(yStar) > yStarMax) return 0;
-  if (mjj < mjjMin) return 0;
   vector<string>::iterator location = find(passedTriggers->begin(), passedTriggers->end(), trigger);
   if ((location - passedTriggers->begin()) >= passedTriggers->size()) return 0;
+  if (LooseBad == 0) return 0;
+  if (abs(eta) > etaMax) return 0;
+  //  if (abs(yStar) > yStarMax) return 0;
+  //  if (mjj < mjjMin) return 0;
   return 1;
 }
 
