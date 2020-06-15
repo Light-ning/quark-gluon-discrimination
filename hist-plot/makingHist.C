@@ -129,10 +129,10 @@ void makingHist(TString dataset, TString intree){
 	t->GetEntry(i);
 
 	// event level cuts
-	if (not eventLevelCuts(njet, jet_pt[0], passedTriggers, yStar, mjj)) continue;
+	if (not eventLevelCuts(njet, (*jet_pt)[0], passedTriggers, yStar, mjj)) continue;
 	// jet level cuts
-	if (not jetLevelCuts(jet_pt[0], jet_clean_passLooseBad[0], jet_eta[0])) continue;
-	if (not jetLevelCuts(jet_pt[1], jet_clean_passLooseBad[1], jet_eta[1])) continue;
+	if (not jetLevelCuts((*jet_pt)[0], jet_clean_passLooseBad[0], jet_eta[0])) continue;
+	if (not jetLevelCuts((*jet_pt)[1], jet_clean_passLooseBad[1], jet_eta[1])) continue;
 
 	// calculate weight
 	// and fill mjj, leading jet pt, sub leading jet pt and ntrack hist
