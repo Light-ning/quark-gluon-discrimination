@@ -70,7 +70,7 @@ void makingHist(TString dataset, TString intree){
 
   // variables used
   vector<float> *jet_pt = 0, *jet_NumTrkPt500PV = 0, *jet_eta = 0;
-  vector<int> *jet_PartonTruthLabelID = 0, *jet_clean_passLooseBad;
+  vector<int> *jet_PartonTruthLabelID = 0, *jet_clean_passLooseBad = 0;
   vector<string> *passedTriggers = 0;
   int njet;
   float mjj, weight, yStar;
