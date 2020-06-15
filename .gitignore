@@ -3,3 +3,5 @@ hist-plot/user.bdong.*.*.tree.root
 hist-plot/histout.root
 .DS_Store
 hist-plot/.DS_Store
+hist-plot/outDir
+hist-plot/readEntries.C
