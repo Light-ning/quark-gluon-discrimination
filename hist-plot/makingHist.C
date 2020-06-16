@@ -90,12 +90,15 @@ void makingHist(TString dataset, TString intree){
     TFile *f = TFile::Open(inputPath + filename);
     TH1D *h = (TH1D*) f->Get("cutflow_weighted");
 
-    sampleEvents += h->GetBinContent(1);
+    if (h != 0){
+      sampleEvents += h->GetBinContent(1);
+    } else cout << "No cutflow_weighted in " << filename << endl;
+
     filename = gSystem->GetDirEntry(dir0);
   }
   
   void *dir = gSystem->OpenDirectory(inputPath);
-  TString filename = gSystem->GetDirEntry(dir);
+  filename = gSystem->GetDirEntry(dir);
   while (filename != ""){
 
     if (!filename.Contains(".root")){
@@ -106,7 +109,7 @@ void makingHist(TString dataset, TString intree){
     TFile *f = TFile::Open(inputPath + filename);
     TTree *t = (TTree*) f->Get(intree);
 
-    if ((t != 0) && (h != 0)){
+    if ((t != 0)){
 
       // set the needed branch status and branch address
       // to get variables from the ttree
@@ -202,10 +205,10 @@ void makingHist(TString dataset, TString intree){
 	  HistSubJetPt_QQ->Fill((*jet_pt)[1], w);
 	}
       }
-    } else cout << "No " << intree << " or no cutflow_weighted" << endl;
+    } else cout << "No " << intree << endl;
 
     f->Close();
-    delete f, t, h;
+    delete f, t;
     filename = gSystem->GetDirEntry(dir);
   }
 
