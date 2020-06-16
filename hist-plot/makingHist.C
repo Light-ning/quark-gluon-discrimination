@@ -272,8 +272,8 @@ bool eventLevelCuts(int njet, float leadingJetPt, vector<string> *passedTriggers
   if (leadingJetPt < leadingJetPtMin) return 0;
   vector<string>::iterator location = find(passedTriggers->begin(), passedTriggers->end(), trigger);
   if ((location - passedTriggers->begin()) >= passedTriggers->size()) return 0;
-  //  if (abs(yStar) > yStarMax) return 0;
-  //  if (mjj < mjjMin) return 0;
+  if (abs(yStar) > yStarMax) return 0;
+  if (mjj < mjjMin) return 0;
   return 1;
 }
 
