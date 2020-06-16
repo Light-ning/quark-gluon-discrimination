@@ -78,7 +78,22 @@ void makingHist(TString dataset, TString intree){
 
   TString inputPath = getInputPath(dataset);
 
+  // Get TotalEventWeight here
+  void *dir0 = gSystem->OpenDirectory(inputPath);
+  TString filename = gSystem->GetDirEntry(dir0);
+  while (filename != ""){
+    if (!filename.Contains(".root")){
+      filename = gSystem->GetDirEntry(dir0);
+      continue;
+    }
+    
+    TFile *f = TFile::Open(inputPath + filename);
+    TH1D *h = (TH1D*) f->Get("cutflow_weighted");
 
+    sampleEvents += h->GetBinContent(1);
+    filename = gSystem->GetDirEntry(dir0);
+  }
+  
   void *dir = gSystem->OpenDirectory(inputPath);
   TString filename = gSystem->GetDirEntry(dir);
   while (filename != ""){
@@ -90,12 +105,8 @@ void makingHist(TString dataset, TString intree){
 
     TFile *f = TFile::Open(inputPath + filename);
     TTree *t = (TTree*) f->Get(intree);
-    TH1D *h = (TH1D*) f->Get("cutflow_weighted");
 
     if ((t != 0) && (h != 0)){
-
-      // sample Events, used to calculate weight
-      sampleEvents = h->GetBinContent(1);
 
       // set the needed branch status and branch address
       // to get variables from the ttree
