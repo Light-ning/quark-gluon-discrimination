@@ -13,9 +13,6 @@ double gluonTrackSlope = 3.5915;
 //double quarkTrackOffset = -7.55743;
 //double quarkTrackSlope = 3.5915;
 
-bool eventLevelCuts(int njet, float leadingJetPt, vector<string> *passedTriggers, float yStar, float mjj);
-bool jetLevelCuts(float pt, int LooseBad, float eta);
-
 //bool getQuarkSelection(float pt, float ntrack);
 bool getGluonSelection(float pt, float ntrack);
 TString getInputPath(TString dataset, TString dataset0);
@@ -70,6 +67,7 @@ void makingHist(TString dataset, TString dataset0, TString intree){
     
     TH1D *Histdeltaeta = getHist("deltaeta", "Histdeltaeta", "deltaeta");
     TH1D *Histdeltaphi = getHist("deltaphi", "Histdeltaphi", "deltaphi");
+    TH1D *Cutflow = new TH1D("cutflow", "cutflow", 8, 0.5, 8.5);
 
     // variables used
     vector<float> *jet_pt = 0, *jet_NumTrkPt500PV = 0, *jet_eta = 0, *jet_phi = 0;
@@ -149,17 +147,29 @@ void makingHist(TString dataset, TString dataset0, TString intree){
             for (int i = 0; i < nEntries; i++){
                 t->GetEntry(i);
 
-                // event level cuts
-                if (not eventLevelCuts(njet, (*jet_pt)[0], passedTriggers, yStar, mjj)) continue;
-                // jet level cuts
-                if (not jetLevelCuts((*jet_pt)[0], (*jet_clean_passLooseBad)[0], (*jet_eta)[0])) continue;
-                if (not jetLevelCuts((*jet_pt)[1], (*jet_clean_passLooseBad)[1], (*jet_eta)[1])) continue;
-
                 // calculate weight
                 // and fill mjj, leading jet pt, sub leading jet pt and ntrack hist
                 if (dataset=="MC"){
                     w = weight / sampleEvents;
                 }
+                
+                vector<string>::iterator location = find(passedTriggers->begin(), passedTriggers->end(), trigger);
+                Cutflow->Fill(1, w);
+                Cutflow->Fill(2, w);
+                if ((*jet_clean_passLooseBad)[0] == 0) continue;
+                if ((*jet_clean_passLooseBad)[1] == 0) continue;
+                Cutflow->Fill(3, w);
+                if ((location - passedTriggers->begin()) >= passedTriggers->size()) continue;
+                Cutflow->Fill(4, w);
+                //if (abs(eta) > etaMax) continue;
+                Cutflow->Fill(5, w);
+                if ((*jet_pt)[0] < leadingJetPtMin) continue;
+                Cutflow->Fill(6, w);
+                if (mjj < mjjMin) continue;
+                Cutflow->Fill(7, w);
+                if (abs(yStar) > yStarMax) continue;
+                Cutflow->Fill(8, w);
+                
                 HistMjj->Fill(mjj, w);
                 HistyStar->Fill(yStar, w);
                 HistLeadingJetPt->Fill((*jet_pt)[0], w);
@@ -230,7 +240,8 @@ void makingHist(TString dataset, TString dataset0, TString intree){
         filename = gSystem->GetDirEntry(dir);
     }
 
-    TFile *fout = TFile::Open(dataset + ".root", "recreate");
+    TFile *fout = TFile::Open(dataset + "_" + dataset0 + ".root", "recreate");
+    Cutflow->Write();
     HistMjj->Write();
     HistMjj_GG->Write();
     HistMjj_GJ->Write();
@@ -294,23 +305,6 @@ bool getGluonSelection(float pt, float ntrack){
     double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
     if (ntrack > SigmoidnTrack) return 1;
     else return 0;
-}
-
-bool eventLevelCuts(int njet, float leadingJetPt, vector<string> *passedTriggers, float yStar, float mjj){
-    if (njet < 2) return 0;
-    if (leadingJetPt < leadingJetPtMin) return 0;
-    vector<string>::iterator location = find(passedTriggers->begin(), passedTriggers->end(), trigger);
-    if ((location - passedTriggers->begin()) >= passedTriggers->size()) return 0;
-    if (abs(yStar) > yStarMax) return 0;
-    if (mjj < mjjMin) return 0;
-    return 1;
-}
-
-bool jetLevelCuts(float pt, int LooseBad, float eta){
-    if (pt <= jetPtMin) return 0;
-    if (LooseBad == 0) return 0;
-    if (abs(eta) > etaMax) return 0;
-    return 1;
 }
 
 TString getInputPath(TString dataset, TString dataset0){
