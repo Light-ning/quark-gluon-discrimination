@@ -184,7 +184,7 @@ int main(int argc,char **argv){
                 if ((*jet_clean_passLooseBad)[0] == 0) continue;
                 if ((*jet_clean_passLooseBad)[1] == 0) continue;
                 Cutflow->Fill(3, w);
-                if ((location - passedTriggers->begin()) >= passedTriggers->size()) continue;
+                if (location == passedTriggers->end()) continue;
                 Cutflow->Fill(4, w);
                 //if (abs(eta) > etaMax) continue;
                 Cutflow->Fill(5, w);
