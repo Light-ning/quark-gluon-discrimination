@@ -17,10 +17,11 @@ using namespace std;
 
 TCanvas *c = new TCanvas("c","c",1100,1100);
 TPad *pad1 = new TPad("pad1","pad1",0,0.31,1,1);
-TPad *pad2 = new TPad("pad2","pad2",0,0,1,0.31);
+TPad *pad2 = new TPad("pad2","pad2",0,0,1,0.30);
 
-TFile *f1 = new TFile("outMC/mjje.root");
-TFile *f2 = new TFile("outdata/mjj18.root");
+TFile *f1;
+TFile *f2;
+float lum = 0;
 
 void draw(TString name);
 
@@ -35,6 +36,23 @@ int main(int argc,char **argv) {
     pad2 -> SetGridx(1);
     pad2 -> SetGridy(1);
     pad2 -> Draw();
+    
+    TString dataset = argv[1];
+    if(dataset=="a" || dataset=="15+16"){
+        f1 = new TFile("outMC/mjje.root");
+        f2 = new TFile("outdata/mjj18.root");
+        lum = 36.17;
+    }
+    if(dataset=="d" || dataset=="17"){
+        f1 = new TFile("outMC/mjje.root");
+        f2 = new TFile("outdata/mjj18.root");
+        lum = 44.31;
+    }
+    if(dataset=="e" || dataset=="18"){
+        f1 = new TFile("outMC/mjje.root");
+        f2 = new TFile("outdata/mjj18.root");
+        lum = 58.45;
+    }
     
     draw("HistMjj");
     c->SaveAs("mjj.png");
@@ -75,7 +93,7 @@ void draw(TString name){
     data->SetLineColor(7);
     data->SetMarkerColor(7);
     data->Draw();
-    mc->Scale(58.45);
+    mc->Scale(lum);
     mc->SetLineColor(2);
     mc->SetMarkerColor(2);
     mc->Draw("same");
