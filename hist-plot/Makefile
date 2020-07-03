@@ -14,6 +14,7 @@ draw: draw.C
 	g++ draw.C `root-config --cflags --glibs` -o draw
 
 clean:
-	rm -rf makingHist drawk
+	rm -rf makingHist drawk draw
 
-
+cleanroot:
+	rm *.root log.* timelog.*
