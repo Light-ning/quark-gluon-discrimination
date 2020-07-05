@@ -92,7 +92,7 @@ int main(int argc,char **argv){
     
     TH1D *Histdeltaeta = getHist("deltaeta", "Histdeltaeta", "deltaeta");
     TH1D *Histdeltaphi = getHist("deltaphi", "Histdeltaphi", "deltaphi");
-    TH1D *Cutflow = new TH1D("cutflow", "cutflow", 8, 0.5, 8.5);
+    TH1D *Cutflow = new TH1D("cutflow", "cutflow", 9, 0.5, 9.5);
 
     // variables used
     vector<float> *jet_pt = 0, *jet_NumTrkPt500PV = 0, *jet_eta = 0, *jet_phi = 0;
@@ -186,7 +186,6 @@ int main(int argc,char **argv){
                 Cutflow->Fill(3, w);
                 if (location == passedTriggers->end()) continue;
                 Cutflow->Fill(4, w);
-                //if (abs(eta) > etaMax) continue;
                 Cutflow->Fill(5, w);
                 if ((*jet_pt)[0] < leadingJetPtMin) continue;
                 Cutflow->Fill(6, w);
@@ -194,6 +193,9 @@ int main(int argc,char **argv){
                 Cutflow->Fill(7, w);
                 if (abs(yStar) > yStarMax) continue;
                 Cutflow->Fill(8, w);
+                //if (abs((*jet_eta)[0]) > etaMax) continue;
+                //if (abs((*jet_eta)[1]) > etaMax) continue;
+                Cutflow->Fill(9, w);
                 
                 HistMjj->Fill(mjj, w);
                 HistyStar->Fill(yStar, w);
@@ -373,23 +375,23 @@ TH1D *getHist(TString type, TString name, TString title){
         Hist->GetXaxis()->SetTitle("N_{track}");
     }
     if (type=="ystar"){
-        Hist = new TH1D(name, title, 80, -1, 1);
+        Hist = new TH1D(name, title, 40, -1.2, 1.2);
         Hist->GetXaxis()->SetTitle("yStar");
     }
     if (type=="eta"){
-        Hist = new TH1D(name, title, 80, -3, 3);
+        Hist = new TH1D(name, title, 50, -5, 5);
         Hist->GetXaxis()->SetTitle("eta");
     }
     if (type=="phi"){
-        Hist = new TH1D(name, title, 80, -3, 3);
+        Hist = new TH1D(name, title, 100, -5, 5);
         Hist->GetXaxis()->SetTitle("phi");
     }
     if (type=="deltaeta"){
-        Hist = new TH1D(name, title, 80, -3, 3);
+        Hist = new TH1D(name, title, 50, -5, 5);
         Hist->GetXaxis()->SetTitle("delta_eta");
     }
     if (type=="deltaphi"){
-        Hist = new TH1D(name, title, 80, 0, 3);
+        Hist = new TH1D(name, title, 100, -5, 5);
         Hist->GetXaxis()->SetTitle("delta_phi");
     }
     Hist->Sumw2();
