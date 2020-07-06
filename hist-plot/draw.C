@@ -18,83 +18,106 @@ TCanvas *c = new TCanvas("c","c",1100,750);
 TFile *f2 = new TFile("mjj.root");
 
 void draw(TString name, float xmin, float xmax, int Truth, int frac);
-void text(double xmax, double ymax, float labelx, float labley, int Truth);
+void text(double ymax, float labelx, float labley, int Truth);
 
 int main(int argc,char **argv) {
     SetAtlasStyle ();
     TString dataset = argv[1];
     
     if(dataset=="MC"){
-        TH1D* HistNTrk = (TH1D*) f2->Get("HistNTrk");
-        TH1D* HistNTrk_G = (TH1D*) f2->Get("HistNTrk_G");
-        TH1D* HistNTrk_Q = (TH1D*) f2->Get("HistNTrk_Q");
+        TH1D* HistNTrkl = (TH1D*) f2->Get("HistNTrkl");
+        TH1D* HistNTrkl_G = (TH1D*) f2->Get("HistNTrkl_G");
+        TH1D* HistNTrkl_Q = (TH1D*) f2->Get("HistNTrkl_Q");
+        TH1D* HistNTrks = (TH1D*) f2->Get("HistNTrks");
+        TH1D* HistNTrks_G = (TH1D*) f2->Get("HistNTrks_G");
+        TH1D* HistNTrks_Q = (TH1D*) f2->Get("HistNTrks_Q");
     
         draw("HistMjj", 400, 12000, 1, 0);
-        text(0.7, 0.85, 0.2, 0.2, 1);
+        text(0.85, 0.2, 0.2, 1);
         c->SaveAs(".mjjt.png");
     
         draw("HistMjj", 400, 12000, 1, 1);
-        text(0.7, 0.75, 0.6, 0.4, 1);
+        text(0.75, 0.6, 0.4, 1);
         c->SaveAs(".frat.png");
     
         draw("HistMjj", 400, 12000, 0, 0);
-        text(0.7, 0.85, 0.2, 0.2, 0);
+        text(0.85, 0.2, 0.2, 0);
         c->SaveAs(".mjj.png");
     
         draw("HistMjj", 400, 12000, 0, 1);
-        text(0.7, 0.85, 0.2, 0.85, 0);
+        text(0.85, 0.2, 0.85, 0);
         c->SaveAs(".fra.png");
     
         draw("HistLeadingJetPt", 400, 8200, 1, 0);
-        text(0.7, 0.85, 0.2, 0.2, 1);
+        text(0.85, 0.2, 0.2, 1);
         c->SaveAs(".LPtt.png");
       
         draw("HistLeadingJetPt", 400, 8200, 0, 0);
-        text(0.7, 0.85, 0.2, 0.2, 0);
+        text(0.85, 0.2, 0.2, 0);
         c->SaveAs(".LPt.png");
     
         draw("HistSubJetPt", 400, 8200, 1, 0);
-        text(0.7, 0.85, 0.2, 0.2, 1);
+        text(0.85, 0.2, 0.2, 1);
         c->SaveAs(".SPtt.png");
     
         draw("HistSubJetPt", 400, 8200, 0, 0);
-        text(0.7, 0.85, 0.2, 0.2, 0);
+        text(0.85, 0.2, 0.2, 0);
         c->SaveAs(".SPt.png");
 
         gPad->SetLogy(0);
-        HistNTrk_Q->SetLineColor(7);
-        HistNTrk_Q->SetMarkerColor(7);
-        HistNTrk_Q->Draw();
-        HistNTrk_G->SetLineColor(2);
-        HistNTrk_G->SetMarkerColor(2);
-        HistNTrk_G->Draw("same");
+        gPad->SetTopMargin(0.05);
+        gPad->SetRightMargin(0.05);
+        gPad->SetBottomMargin(0.16);
+        gPad->SetLeftMargin(0.16);
+        HistNTrkl_Q->SetLineColor(7);
+        HistNTrkl_Q->SetMarkerColor(7);
+        HistNTrkl_Q->Draw();
+        HistNTrkl_G->SetLineColor(2);
+        HistNTrkl_G->SetMarkerColor(2);
+        HistNTrkl_G->Draw("same");
         myText(       0.7,  0.85, 1, "#sqrt{s}= 13 TeV");
         myMarkerText( 0.7, 0.75, 2, 20, "G",1);
         myMarkerText( 0.7, 0.65, 7, 20, "Q",1);
         ATLASLabel(0.6,0.2,"Preliminary");
-        c->SaveAs(".NTrk.png");
+        c->SaveAs(".NTrkl.png");
+        
+        HistNTrks_Q->SetLineColor(7);
+        HistNTrks_Q->SetMarkerColor(7);
+        HistNTrks_Q->Draw();
+        HistNTrks_G->SetLineColor(2);
+        HistNTrks_G->SetMarkerColor(2);
+        HistNTrks_G->Draw("same");
+        myText(       0.7,  0.85, 1, "#sqrt{s}= 13 TeV");
+        myMarkerText( 0.7, 0.75, 2, 20, "G",1);
+        myMarkerText( 0.7, 0.65, 7, 20, "Q",1);
+        ATLASLabel(0.6,0.2,"Preliminary");
+        c->SaveAs(".NTrks.png");
     }
     
     if(dataset=="data"){
-        draw("HistMjj", 400, 8200, 0, 0);
-        text(0.7, 0.85, 0.2, 0.2, 0);
+        draw("HistMjj", 400, 12000, 0, 0);
+        text(0.85, 0.2, 0.2, 0);
         c->SaveAs(".mjj.png");
     
-        draw("HistMjj", 400, 8200, 0, 1);
-        text(0.25, 0.75, 0.2, 0.85, 0);
+        draw("HistMjj", 400, 12000, 0, 1);
+        text(0.85, 0.2, 0.85, 0);
         c->SaveAs(".fra.png");
       
-        draw("HistLeadingJetPt", 400, 4200, 0, 0);
-        text(0.7, 0.85, 0.2, 0.2, 0);
+        draw("HistLeadingJetPt", 400, 8200, 0, 0);
+        text(0.85, 0.2, 0.2, 0);
         c->SaveAs(".LPt.png");
 
-        draw("HistSubJetPt", 400, 4200, 0, 0);
-        text(0.7, 0.85, 0.2, 0.2, 0);
+        draw("HistSubJetPt", 400, 8200, 0, 0);
+        text(0.85, 0.2, 0.2, 0);
         c->SaveAs(".SPt.png");
     }
 }
 
 void draw(TString name, float xmin, float xmax, int Truth, int frac){
+    gPad->SetTopMargin(0.05);
+    gPad->SetRightMargin(0.05);
+    gPad->SetBottomMargin(0.16);
+    gPad->SetLeftMargin(0.16);
     TString nameGG;
     TString nameQG;
     TString nameQQ;
@@ -130,7 +153,6 @@ void draw(TString name, float xmin, float xmax, int Truth, int frac){
         Hist_QG->Divide(Hist);
         Hist_QQ->Divide(Hist);
         Hist_QG->SetYTitle("fraction");
-        Hist_QG->SetAxisRange(xmin, xmax, "X");
         Hist_QG->SetAxisRange(0, 1,"Y");
         Hist_QG->Draw();
     }
@@ -143,17 +165,17 @@ void draw(TString name, float xmin, float xmax, int Truth, int frac){
     Hist_QQ->Draw("same");
 }
 
-void text(double xmax, double ymax, float labelx, float labley, int Truth){
-    myText(    xmax, ymax, 1, "#sqrt{s}= 13 TeV");
+void text(double ymax, float labelx, float labley, int Truth){
+    myText(       0.7, ymax, 1, "#sqrt{s}= 13 TeV");
     if(Truth==0){
-        myMarkerText( xmax, ymax-0.05, 2, 20, "GG",1);
-        myMarkerText( xmax, ymax-0.1, 3, 20, "QG",1);
-        myMarkerText( xmax, ymax-0.15, 7, 20, "QQ",1);
+        myMarkerText( 0.7, ymax-0.05, 2, 20, "GG",1);
+        myMarkerText( 0.7, ymax-0.1, 3, 20, "QG",1);
+        myMarkerText( 0.7, ymax-0.15, 7, 20, "QQ",1);
     }
     if(Truth==1){
-        myMarkerText( xmax, ymax-0.05, 2, 20, "TruthGG",1);
-        myMarkerText( xmax, ymax-0.1, 3, 20, "TruthQG",1);
-        myMarkerText( xmax, ymax-0.15, 7, 20, "TruthQQ",1);
+        myMarkerText( 0.7, ymax-0.05, 2, 20, "TruthGG",1);
+        myMarkerText( 0.7, ymax-0.1, 3, 20, "TruthQG",1);
+        myMarkerText( 0.7, ymax-0.15, 7, 20, "TruthQQ",1);
     }
     ATLASLabel(labelx, labley, "Preliminary");
 }
