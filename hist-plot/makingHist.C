@@ -79,9 +79,12 @@ int main(int argc,char **argv){
     TH1D *HistSubJetPt_QQ = getHist("pt", "HistSubJetPt_QQ", "sub leading jet pt in tagged QQ events");
 
     // number of track hist
-    TH1D *HistNTrk = getHist("ntrk", "HistNTrk", "number of tracks");
-    TH1D *HistNTrk_Q = getHist("ntrk", "HistNTrk_Q", "number of tracks in Q jets");
-    TH1D *HistNTrk_G = getHist("ntrk", "HistNTrk_G", "number of tracks in G jets");
+    TH1D *HistNTrkl = getHist("ntrk", "HistNTrkl", "number of tracks");
+    TH1D *HistNTrkl_Q = getHist("ntrk", "HistNTrkl_Q", "number of tracks in Q jets");
+    TH1D *HistNTrkl_G = getHist("ntrk", "HistNTrkl_G", "number of tracks in G jets");
+    TH1D *HistNTrks = getHist("ntrk", "HistNTrks", "number of tracks");
+    TH1D *HistNTrks_Q = getHist("ntrk", "HistNTrks_Q", "number of tracks in Q jets");
+    TH1D *HistNTrks_G = getHist("ntrk", "HistNTrks_G", "number of tracks in G jets");
     
     TH1D *HistyStar = getHist("ystar", "HistyStar", "yStar");
     
@@ -193,8 +196,8 @@ int main(int argc,char **argv){
                 Cutflow->Fill(7, w);
                 if (abs(yStar) > yStarMax) continue;
                 Cutflow->Fill(8, w);
-                //if (abs((*jet_eta)[0]) > etaMax) continue;
-                //if (abs((*jet_eta)[1]) > etaMax) continue;
+                if (abs((*jet_eta)[0]) > etaMax) continue;
+                if (abs((*jet_eta)[1]) > etaMax) continue;
                 Cutflow->Fill(9, w);
                 
                 HistMjj->Fill(mjj, w);
@@ -207,16 +210,17 @@ int main(int argc,char **argv){
                 HistSjetphi->Fill((*jet_phi)[1], w);
                 Histdeltaeta->Fill((*jet_eta)[0]-(*jet_eta)[1], w);
                 Histdeltaphi->Fill((*jet_phi)[0]-(*jet_phi)[1], w);
-                HistNTrk->Fill((*jet_NumTrkPt500PV)[0], w);
+                HistNTrkl->Fill((*jet_NumTrkPt500PV)[0], w);
+                HistNTrks->Fill((*jet_NumTrkPt500PV)[1], w);
 
                 // parton truth label
                 if (dataset=="MC"){
                     int truthLeadingG = ((*jet_PartonTruthLabelID)[0] == 21);
                     int truthSubG = ((*jet_PartonTruthLabelID)[1] == 21);
-                    if (truthLeadingG) HistNTrk_G->Fill((*jet_NumTrkPt500PV)[0], w);
-                    else HistNTrk_Q->Fill((*jet_NumTrkPt500PV)[0], w);
-                    if (truthSubG) HistNTrk_G->Fill((*jet_NumTrkPt500PV)[1], w);
-                    else HistNTrk_Q->Fill((*jet_NumTrkPt500PV)[1], w);
+                    if (truthLeadingG) HistNTrkl_G->Fill((*jet_NumTrkPt500PV)[0], w);
+                    else HistNTrkl_Q->Fill((*jet_NumTrkPt500PV)[0], w);
+                    if (truthSubG) HistNTrks_G->Fill((*jet_NumTrkPt500PV)[1], w);
+                    else HistNTrks_Q->Fill((*jet_NumTrkPt500PV)[1], w);
                     if ((truthLeadingG + truthSubG) >= 1){  // GJ dijet
                         HistMjj_TruthGJ->Fill(mjj, w);
                         HistLeadingJetPt_TruthGJ->Fill((*jet_pt)[0], w);
@@ -287,9 +291,12 @@ int main(int argc,char **argv){
     HistSubJetPt_QG->Write();
     HistSubJetPt_QQ->Write();
 
-    HistNTrk->Write();
-    HistNTrk_G->Write();
-    HistNTrk_Q->Write();
+    HistNTrkl->Write();
+    HistNTrkl_G->Write();
+    HistNTrkl_Q->Write();
+    HistNTrks->Write();
+    HistNTrks_G->Write();
+    HistNTrks_Q->Write();
     
     HistyStar->Write();
     HistLjeteta->Write();
