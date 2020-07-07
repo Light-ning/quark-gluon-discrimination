@@ -209,8 +209,8 @@ int main(int argc,char **argv){
                 Cutflow->Fill(7, w);
                 if (abs(yStar) > yStarMax) continue;
                 Cutflow->Fill(8, w);
-                if (abs((*jet_eta)[0]) > etaMax) continue;
-                if (abs((*jet_eta)[1]) > etaMax) continue;
+                if (abs((*jet_eta)[0]) >= etaMax) continue;
+                if (abs((*jet_eta)[1]) >= etaMax) continue;
                 Cutflow->Fill(9, w);
                 
                 HistMjj->Fill(mjj, w);
@@ -230,8 +230,8 @@ int main(int argc,char **argv){
                 if (dataset=="MC"){
                     int truthLeading = getPartonLabel((*jet_PartonTruthLabelID)[0]);
                     int truthSub = getPartonLabel((*jet_PartonTruthLabelID)[1]);
-                    int isTaggedG_Lead = getGluonSelection((*jet_pt)[0]);
-                    int isTaggedG_Sub =  getGluonSelection((*jet_pt)[1]);
+                    int isTaggedG_Lead = getGluonSelection((*jet_pt)[0], (*jet_NumTrkPt500PV)[0]);
+                    int isTaggedG_Sub =  getGluonSelection((*jet_pt)[1], (*jet_NumTrkPt500PV)[1]);
                     if (truthLeading == 1) {
                         HistNTrkl_G->Fill((*jet_NumTrkPt500PV)[0], w);
                         HistLeadingJetPt_TruthG->Fill((*jet_pt)[0], w);
@@ -252,7 +252,7 @@ int main(int argc,char **argv){
                         HistSubJetPt_TruthQ->Fill((*jet_pt)[1], w);
                         if (isTaggedG_Sub)HistSubJetPt_TruthQ_TaggedG->Fill((*jet_pt)[1], w);
                     }
-                    if ((truthLeading == 1 || truthSub == 1){  // GJ dijet
+                    if (truthLeading == 1 || truthSub == 1){  // GJ dijet
                         HistMjj_TruthGJ->Fill(mjj, w);
                         HistLeadingJetPt_TruthGJ->Fill((*jet_pt)[0], w);
                         HistSubJetPt_TruthGJ->Fill((*jet_pt)[1], w);
