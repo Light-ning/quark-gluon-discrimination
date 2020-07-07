@@ -31,13 +31,14 @@ float yStarMax = 0.6;
 float mjjMin = 1100;
 string trigger = "HLT_j420";
 
-double gluonTrackOffset = -7.55743;
-double gluonTrackSlope = 3.5915;
+double gluonTrackOffset = -7.26742;
+double gluonTrackSlope = 4.16218;
 //double quarkTrackOffset = -7.55743;
 //double quarkTrackSlope = 3.5915;
 
 //bool getQuarkSelection(float pt, float ntrack);
 bool getGluonSelection(float pt, float ntrack);
+int getPartonLabel(int partonlabelid);
 TString getInputPath(TString dataset, TString dataset0);
 TH1D *getHist(TString type, TString name, TString title);
 
@@ -58,10 +59,16 @@ int main(int argc,char **argv){
 
     // Leading jet pt Hist
     TH1D *HistLeadingJetPt = getHist("pt", "HistLeadingJetPt", "leading jet pt");
+    TH1D *HistLeadingJetPt_TruthG = getHist("pt", "HistLeadingJetPt_TruthG", "leading jet pt in truth labelled G");
+    TH1D *HistLeadingJetPt_TruthQ = getHist("pt", "HistLeadingJetPt_TruthQ", "leading jet pt in truth labelled Q");
+    TH1D *HistLeadingJetPt_TruthG_TaggedG = getHist("pt", "HistLeadingJetPt_TruthG_TaggedG", "leading jet pt in truth labelled G tagged as G");
+    TH1D *HistLeadingJetPt_TruthQ_TaggedG = getHist("pt", "HistLeadingJetPt_TruthQ_TaggedG", "leading jet pt in truth labelled Q tagged as G");
     TH1D *HistLeadingJetPt_TruthGG = getHist("pt", "HistLeadingJetPt_TruthGG", "leading jet pt in truth labelled GG events");
     TH1D *HistLeadingJetPt_TruthGJ = getHist("pt", "HistLeadingJetPt_TruthGJ", "leading jet pt in truth labelled GJ events");
     TH1D *HistLeadingJetPt_TruthQG = getHist("pt", "HistLeadingJetPt_TruthQG", "leading jet pt in truth labelled QG events");
     TH1D *HistLeadingJetPt_TruthQQ = getHist("pt", "HistLeadingJetPt_TruthQQ", "leading jet pt in truth labelled QQ events");
+    TH1D *HistLeadingJetPt_G = getHist("pt", "HistLeadingJetPt_G", "leading jet pt in tagged G events");
+    TH1D *HistLeadingJetPt_Q = getHist("pt", "HistLeadingJetPt_Q", "leading jet pt in tagged Q events");
     TH1D *HistLeadingJetPt_GG = getHist("pt", "HistLeadingJetPt_GG", "leading jet pt in tagged GG events");
     TH1D *HistLeadingJetPt_GJ = getHist("pt", "HistLeadingJetPt_GJ", "leading jet pt in tagged GJ events");
     TH1D *HistLeadingJetPt_QG = getHist("pt", "HistLeadingJetPt_QG", "leading jet pt in tagged QG events");
@@ -69,10 +76,16 @@ int main(int argc,char **argv){
 
     // Sub Leading jet pt Hist
     TH1D *HistSubJetPt = getHist("pt", "HistSubJetPt", "sub leading jet pt");
+    TH1D *HistSubJetPt_TruthG = getHist("pt", "HistSubJetPt_TruthG", "sub leading jet pt in truth labelled G");
+    TH1D *HistSubJetPt_TruthQ = getHist("pt", "HistSubJetPt_TruthQ", "sub leading jet pt in truth labelled Q");
+    TH1D *HistSubJetPt_TruthG_TaggedG = getHist("pt", "HistSubJetPt_TruthG_TaggedG", "sub leading jet pt in truth labelled G tagged as G");
+    TH1D *HistSubJetPt_TruthQ_TaggedG = getHist("pt", "HistSubJetPt_TruthQ_TaggedG", "sub leading jet pt in truth labelled Q tagged as G");
     TH1D *HistSubJetPt_TruthGG = getHist("pt", "HistSubJetPt_TruthGG", "sub leading jet pt in truth labelled GG events");
     TH1D *HistSubJetPt_TruthGJ = getHist("pt", "HistSubJetPt_TruthGJ", "sub leading jet pt in truth labelled GJ events");
     TH1D *HistSubJetPt_TruthQG = getHist("pt", "HistSubJetPt_TruthQG", "sub leading jet pt in truth labelled QG events");
     TH1D *HistSubJetPt_TruthQQ = getHist("pt", "HistSubJetPt_TruthQQ", "sub leading jet pt in truth labelled QQ events");
+    TH1D *HistSubJetPt_G = getHist("pt", "HistSubJetPt_G", "sub leading jet pt in tagged G events");
+    TH1D *HistSubJetPt_Q = getHist("pt", "HistSubJetPt_Q", "sub leading jet pt in tagged Q events");
     TH1D *HistSubJetPt_GG = getHist("pt", "HistSubJetPt_GG", "sub leading jet pt in tagged GG events");
     TH1D *HistSubJetPt_GJ = getHist("pt", "HistSubJetPt_GJ", "sub leading jet pt in tagged GJ events");
     TH1D *HistSubJetPt_QG = getHist("pt", "HistSubJetPt_QG", "sub leading jet pt in tagged QG events");
@@ -215,26 +228,44 @@ int main(int argc,char **argv){
 
                 // parton truth label
                 if (dataset=="MC"){
-                    int truthLeadingG = ((*jet_PartonTruthLabelID)[0] == 21);
-                    int truthSubG = ((*jet_PartonTruthLabelID)[1] == 21);
-                    if (truthLeadingG) HistNTrkl_G->Fill((*jet_NumTrkPt500PV)[0], w);
-                    else HistNTrkl_Q->Fill((*jet_NumTrkPt500PV)[0], w);
-                    if (truthSubG) HistNTrks_G->Fill((*jet_NumTrkPt500PV)[1], w);
-                    else HistNTrks_Q->Fill((*jet_NumTrkPt500PV)[1], w);
-                    if ((truthLeadingG + truthSubG) >= 1){  // GJ dijet
+                    int truthLeading = getPartonLabel((*jet_PartonTruthLabelID)[0]);
+                    int truthSub = getPartonLabel((*jet_PartonTruthLabelID)[1]);
+                    int isTaggedG_Lead = getGluonSelection((*jet_pt)[0]);
+                    int isTaggedG_Sub =  getGluonSelection((*jet_pt)[1]);
+                    if (truthLeading == 1) {
+                        HistNTrkl_G->Fill((*jet_NumTrkPt500PV)[0], w);
+                        HistLeadingJetPt_TruthG->Fill((*jet_pt)[0], w);
+                        if(isTaggedG_Lead) HistLeadingJetPt_TruthG_TaggedG->Fill((*jet_pt)[0], w);
+                    }
+                    else if (truthLeading == 0)  {
+                        HistNTrkl_Q->Fill((*jet_NumTrkPt500PV)[0], w);
+                        HistLeadingJetPt_TruthQ->Fill((*jet_pt)[0], w);
+                        if(isTaggedG_Lead) HistLeadingJetPt_TruthQ_TaggedG->Fill((*jet_pt)[0], w);
+                    }
+                    if (truthSub == 1) {
+                        HistNTrks_G->Fill((*jet_NumTrkPt500PV)[1], w);
+                        HistSubJetPt_TruthG->Fill((*jet_pt)[1], w);
+                        if (isTaggedG_Sub)HistSubJetPt_TruthG_TaggedG->Fill((*jet_pt)[1], w);
+                    }
+                    else if (truthSub == 0) {
+                        HistNTrks_Q->Fill((*jet_NumTrkPt500PV)[1], w);
+                        HistSubJetPt_TruthQ->Fill((*jet_pt)[1], w);
+                        if (isTaggedG_Sub)HistSubJetPt_TruthQ_TaggedG->Fill((*jet_pt)[1], w);
+                    }
+                    if ((truthLeading == 1 || truthSub == 1){  // GJ dijet
                         HistMjj_TruthGJ->Fill(mjj, w);
                         HistLeadingJetPt_TruthGJ->Fill((*jet_pt)[0], w);
                         HistSubJetPt_TruthGJ->Fill((*jet_pt)[1], w);
                     }
-                    if ((truthLeadingG + truthSubG) == 2){  // GG dijet
+                    if ((truthLeading + truthSub) == 2){  // GG dijet
                         HistMjj_TruthGG->Fill(mjj, w);
                         HistLeadingJetPt_TruthGG->Fill((*jet_pt)[0], w);
                         HistSubJetPt_TruthGG->Fill((*jet_pt)[1], w);
-                    } else if ((truthLeadingG + truthSubG) == 1){  // QG dijet
+                    } else if ((truthLeading + truthSub) == 1){  // QG dijet
                         HistMjj_TruthQG->Fill(mjj, w);
                         HistLeadingJetPt_TruthQG->Fill((*jet_pt)[0], w);
                         HistSubJetPt_TruthQG->Fill((*jet_pt)[1], w);
-                    } else if ((truthLeadingG + truthSubG) == 0){  // QQ dijet
+                    } else if ((truthLeading + truthSub) == 0){  // QQ dijet
                         HistMjj_TruthQQ->Fill(mjj, w);
                         HistLeadingJetPt_TruthQQ->Fill((*jet_pt)[0], w);
                         HistSubJetPt_TruthQQ->Fill((*jet_pt)[1], w);
@@ -244,6 +275,8 @@ int main(int argc,char **argv){
                 // dijet gg/gj/jj selection by NumTrk cut
                 int numberGJet = 0;
                 numberGJet = getGluonSelection((*jet_pt)[0], (*jet_NumTrkPt500PV)[0]) + getGluonSelection((*jet_pt)[1], (*jet_NumTrkPt500PV)[1]);
+
+                
 
                 if (numberGJet >= 1){
                     HistMjj_GJ->Fill(mjj, w);
@@ -311,6 +344,10 @@ int main(int argc,char **argv){
         HistMjj_TruthGJ->Write();
         HistMjj_TruthQG->Write();
         HistMjj_TruthQQ->Write();
+        HistLeadingJetPt_TruthG->Write();
+        HistLeadingJetPt_TruthQ->Write();
+        HistLeadingJetPt_TruthG_TaggedG->Write();
+        HistLeadingJetPt_TruthQ_TaggedG->Write();
         HistLeadingJetPt_TruthGG->Write();
         HistLeadingJetPt_TruthGJ->Write();
         HistLeadingJetPt_TruthQG->Write();
@@ -319,6 +356,10 @@ int main(int argc,char **argv){
         HistSubJetPt_TruthGJ->Write();
         HistSubJetPt_TruthQG->Write();
         HistSubJetPt_TruthQQ->Write();
+        HistSubJetPt_TruthG->Write();
+        HistSubJetPt_TruthQ->Write();
+        HistSubJetPt_TruthG_TaggedG->Write();
+        HistSubJetPt_TruthQ_TaggedG->Write();
     }
 
     fout->Close();
@@ -339,6 +380,16 @@ bool getGluonSelection(float pt, float ntrack){
     double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
     if (ntrack > SigmoidnTrack) return 1;
     else return 0;
+}
+
+int getPartonLabel(int partonlabelid){
+    int type = -99 ;
+    if (partonlabelid == 21){
+        type = 1;
+    }else if (0<partonlabelid && partonlabelid<7){
+        type = 0;
+    }
+    return type;
 }
 
 TString getInputPath(TString dataset, TString dataset0){
