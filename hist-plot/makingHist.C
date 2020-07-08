@@ -5,10 +5,11 @@
 #include <fstream>
 #include <iomanip>
 #include <math.h>
+#include <stdio.h>
 
 #include "TEnv.h"
 #include "TFile.h"
-#include "TH1D.h"
+#include "TH1F.h"
 #include "TString.h"
 #include "TCanvas.h"
 #include "TTree.h"
@@ -40,75 +41,15 @@ double gluonTrackSlope = 4.16218;
 bool getGluonSelection(float pt, float ntrack);
 int getPartonLabel(int partonlabelid);
 TString getInputPath(TString dataset, TString dataset0);
-TH1D *getHist(TString type, TString name, TString title);
+void getHist(TString histname, float type, float w);
+std::map<TString, TH1F* > Hist;
 
 int main(int argc,char **argv){
     TString dataset = argv[1];
     TString dataset0 = argv[2];
     TString intree = argv[3];
-    // Mass Hist
-    TH1D *HistMjj = getHist("mass", "HistMjj", "mjj");
-    TH1D *HistMjj_TruthGG = getHist("mass", "HistMjj_TruthGG", "mjj in truth labelled GG events");
-    TH1D *HistMjj_TruthGJ = getHist("mass", "HistMjj_TruthGJ", "mjj in truth labelled GJ events");
-    TH1D *HistMjj_TruthQG = getHist("mass", "HistMjj_TruthQG", "mjj in truth labelled QG events");
-    TH1D *HistMjj_TruthQQ = getHist("mass", "HistMjj_TruthQQ", "mjj in truth labelled QQ events");
-    TH1D *HistMjj_GG = getHist("mass", "HistMjj_GG", "mjj in tagged GG events");
-    TH1D *HistMjj_GJ = getHist("mass", "HistMjj_GJ", "mjj in tagged GJ events");
-    TH1D *HistMjj_QG = getHist("mass", "HistMjj_QG", "mjj in tagged QG events");
-    TH1D *HistMjj_QQ = getHist("mass", "HistMjj_QQ", "mjj in tagged QQ events");
 
-    // Leading jet pt Hist
-    TH1D *HistLeadingJetPt = getHist("pt", "HistLeadingJetPt", "leading jet pt");
-    TH1D *HistLeadingJetPt_TruthG = getHist("pt", "HistLeadingJetPt_TruthG", "leading jet pt in truth labelled G");
-    TH1D *HistLeadingJetPt_TruthQ = getHist("pt", "HistLeadingJetPt_TruthQ", "leading jet pt in truth labelled Q");
-    TH1D *HistLeadingJetPt_TruthG_TaggedG = getHist("pt", "HistLeadingJetPt_TruthG_TaggedG", "leading jet pt in truth labelled G tagged as G");
-    TH1D *HistLeadingJetPt_TruthQ_TaggedG = getHist("pt", "HistLeadingJetPt_TruthQ_TaggedG", "leading jet pt in truth labelled Q tagged as G");
-    TH1D *HistLeadingJetPt_TruthGG = getHist("pt", "HistLeadingJetPt_TruthGG", "leading jet pt in truth labelled GG events");
-    TH1D *HistLeadingJetPt_TruthGJ = getHist("pt", "HistLeadingJetPt_TruthGJ", "leading jet pt in truth labelled GJ events");
-    TH1D *HistLeadingJetPt_TruthQG = getHist("pt", "HistLeadingJetPt_TruthQG", "leading jet pt in truth labelled QG events");
-    TH1D *HistLeadingJetPt_TruthQQ = getHist("pt", "HistLeadingJetPt_TruthQQ", "leading jet pt in truth labelled QQ events");
-    TH1D *HistLeadingJetPt_G = getHist("pt", "HistLeadingJetPt_G", "leading jet pt in tagged G events");
-    TH1D *HistLeadingJetPt_Q = getHist("pt", "HistLeadingJetPt_Q", "leading jet pt in tagged Q events");
-    TH1D *HistLeadingJetPt_GG = getHist("pt", "HistLeadingJetPt_GG", "leading jet pt in tagged GG events");
-    TH1D *HistLeadingJetPt_GJ = getHist("pt", "HistLeadingJetPt_GJ", "leading jet pt in tagged GJ events");
-    TH1D *HistLeadingJetPt_QG = getHist("pt", "HistLeadingJetPt_QG", "leading jet pt in tagged QG events");
-    TH1D *HistLeadingJetPt_QQ = getHist("pt", "HistLeadingJetPt_QQ", "leading jet pt in tagged QQ events");
-
-    // Sub Leading jet pt Hist
-    TH1D *HistSubJetPt = getHist("pt", "HistSubJetPt", "sub leading jet pt");
-    TH1D *HistSubJetPt_TruthG = getHist("pt", "HistSubJetPt_TruthG", "sub leading jet pt in truth labelled G");
-    TH1D *HistSubJetPt_TruthQ = getHist("pt", "HistSubJetPt_TruthQ", "sub leading jet pt in truth labelled Q");
-    TH1D *HistSubJetPt_TruthG_TaggedG = getHist("pt", "HistSubJetPt_TruthG_TaggedG", "sub leading jet pt in truth labelled G tagged as G");
-    TH1D *HistSubJetPt_TruthQ_TaggedG = getHist("pt", "HistSubJetPt_TruthQ_TaggedG", "sub leading jet pt in truth labelled Q tagged as G");
-    TH1D *HistSubJetPt_TruthGG = getHist("pt", "HistSubJetPt_TruthGG", "sub leading jet pt in truth labelled GG events");
-    TH1D *HistSubJetPt_TruthGJ = getHist("pt", "HistSubJetPt_TruthGJ", "sub leading jet pt in truth labelled GJ events");
-    TH1D *HistSubJetPt_TruthQG = getHist("pt", "HistSubJetPt_TruthQG", "sub leading jet pt in truth labelled QG events");
-    TH1D *HistSubJetPt_TruthQQ = getHist("pt", "HistSubJetPt_TruthQQ", "sub leading jet pt in truth labelled QQ events");
-    TH1D *HistSubJetPt_G = getHist("pt", "HistSubJetPt_G", "sub leading jet pt in tagged G events");
-    TH1D *HistSubJetPt_Q = getHist("pt", "HistSubJetPt_Q", "sub leading jet pt in tagged Q events");
-    TH1D *HistSubJetPt_GG = getHist("pt", "HistSubJetPt_GG", "sub leading jet pt in tagged GG events");
-    TH1D *HistSubJetPt_GJ = getHist("pt", "HistSubJetPt_GJ", "sub leading jet pt in tagged GJ events");
-    TH1D *HistSubJetPt_QG = getHist("pt", "HistSubJetPt_QG", "sub leading jet pt in tagged QG events");
-    TH1D *HistSubJetPt_QQ = getHist("pt", "HistSubJetPt_QQ", "sub leading jet pt in tagged QQ events");
-
-    // number of track hist
-    TH1D *HistNTrkl = getHist("ntrk", "HistNTrkl", "number of tracks");
-    TH1D *HistNTrkl_Q = getHist("ntrk", "HistNTrkl_Q", "number of tracks in Q jets");
-    TH1D *HistNTrkl_G = getHist("ntrk", "HistNTrkl_G", "number of tracks in G jets");
-    TH1D *HistNTrks = getHist("ntrk", "HistNTrks", "number of tracks");
-    TH1D *HistNTrks_Q = getHist("ntrk", "HistNTrks_Q", "number of tracks in Q jets");
-    TH1D *HistNTrks_G = getHist("ntrk", "HistNTrks_G", "number of tracks in G jets");
-    
-    TH1D *HistyStar = getHist("ystar", "HistyStar", "yStar");
-    
-    TH1D *HistLjeteta = getHist("eta", "HistLjeteta", "eta");
-    TH1D *HistSjeteta = getHist("eta", "HistSjeteta", "eta");
-    TH1D *HistLjetphi = getHist("phi", "HistLjetphi", "phi");
-    TH1D *HistSjetphi = getHist("phi", "HistSjetphi", "phi");
-    
-    TH1D *Histdeltaeta = getHist("deltaeta", "Histdeltaeta", "deltaeta");
-    TH1D *Histdeltaphi = getHist("deltaphi", "Histdeltaphi", "deltaphi");
-    TH1D *Cutflow = new TH1D("cutflow", "cutflow", 9, 0.5, 9.5);
+    TH1F *Cutflow = new TH1F("cutflow", "cutflow", 9, 0.5, 9.5);
 
     // variables used
     vector<float> *jet_pt = 0, *jet_NumTrkPt500PV = 0, *jet_eta = 0, *jet_phi = 0;
@@ -116,7 +57,7 @@ int main(int argc,char **argv){
     vector<string> *passedTriggers = 0;
     int njet;
     float mjj, weight, yStar;
-    double w = 1, sampleEvents = 0;
+    float w = 1., sampleEvents = 0.;
 
     TString inputPath = getInputPath(dataset, dataset0);
 
@@ -130,7 +71,7 @@ int main(int argc,char **argv){
                 continue;
             }
             TFile *f = TFile::Open(inputPath + filename0);
-            TH1D *h = (TH1D*) f->Get("cutflow_weighted");
+            TH1F *h = (TH1F*) f->Get("cutflow_weighted");
         
             if (h != 0){
                 sampleEvents += h->GetBinContent(1);
@@ -142,6 +83,7 @@ int main(int argc,char **argv){
   
     void *dir = gSystem->OpenDirectory(inputPath);
     TString filename = gSystem->GetDirEntry(dir);
+    std::cout<<"2"<<filename<<std::endl;
     while (filename != ""){
 
         if (!filename.Contains(".root")){
@@ -149,7 +91,9 @@ int main(int argc,char **argv){
             continue;
         }
         TFile *f = TFile::Open(inputPath + filename);
+        std::cout<<"222222"<<std::endl;
         TTree *t = (TTree*) f->Get(intree);
+        std::cout<<"3333"<<std::endl;
 
         if ((t != 0)){
 
@@ -212,19 +156,19 @@ int main(int argc,char **argv){
                 if (abs((*jet_eta)[0]) >= etaMax) continue;
                 if (abs((*jet_eta)[1]) >= etaMax) continue;
                 Cutflow->Fill(9, w);
-                
-                HistMjj->Fill(mjj, w);
-                HistyStar->Fill(yStar, w);
-                HistLeadingJetPt->Fill((*jet_pt)[0], w);
-                HistSubJetPt->Fill((*jet_pt)[1], w);
-                HistLjeteta->Fill((*jet_eta)[0], w);
-                HistSjeteta->Fill((*jet_eta)[1], w);
-                HistLjetphi->Fill((*jet_phi)[0], w);
-                HistSjetphi->Fill((*jet_phi)[1], w);
-                Histdeltaeta->Fill((*jet_eta)[0]-(*jet_eta)[1], w);
-                Histdeltaphi->Fill((*jet_phi)[0]-(*jet_phi)[1], w);
-                HistNTrkl->Fill((*jet_NumTrkPt500PV)[0], w);
-                HistNTrks->Fill((*jet_NumTrkPt500PV)[1], w);
+               
+                getHist("HistMjj", mjj ,w);
+                getHist("HistyStar", yStar ,w);
+                getHist("HistLeadingJetPt",(*jet_pt)[0], w);
+                getHist("HistSubJetPt",(*jet_pt)[1], w);
+                getHist("HistLjeteta",(*jet_eta)[0], w);
+                getHist("HistSjeteta",(*jet_eta)[1], w);
+                getHist("HistLjetphi",(*jet_phi)[0], w);
+                getHist("HistSjetphi",(*jet_phi)[1], w);
+                getHist("Histdeltaeta",(*jet_eta)[0]-(*jet_eta)[1], w);
+                getHist("Histdeltaphi",(*jet_phi)[0]-(*jet_phi)[1], w);
+                getHist("HistNTrkl",(*jet_NumTrkPt500PV)[0], w);
+                getHist("HistNTrks",(*jet_NumTrkPt500PV)[1], w);
 
                 // parton truth label
                 if (dataset=="MC"){
@@ -233,42 +177,42 @@ int main(int argc,char **argv){
                     int isTaggedG_Lead = getGluonSelection((*jet_pt)[0], (*jet_NumTrkPt500PV)[0]);
                     int isTaggedG_Sub =  getGluonSelection((*jet_pt)[1], (*jet_NumTrkPt500PV)[1]);
                     if (truthLeading == 1) {
-                        HistNTrkl_G->Fill((*jet_NumTrkPt500PV)[0], w);
-                        HistLeadingJetPt_TruthG->Fill((*jet_pt)[0], w);
-                        if(isTaggedG_Lead) HistLeadingJetPt_TruthG_TaggedG->Fill((*jet_pt)[0], w);
+                        getHist("HistNTrkl_G", (*jet_NumTrkPt500PV)[0], w);
+                        getHist("HistLeadingJetPt_TruthG",(*jet_pt)[0], w);
+                        if(isTaggedG_Lead) getHist("HistLeadingJetPt_TruthG_TaggedG",(*jet_pt)[0], w);
                     }
                     else if (truthLeading == 0)  {
-                        HistNTrkl_Q->Fill((*jet_NumTrkPt500PV)[0], w);
-                        HistLeadingJetPt_TruthQ->Fill((*jet_pt)[0], w);
-                        if(isTaggedG_Lead) HistLeadingJetPt_TruthQ_TaggedG->Fill((*jet_pt)[0], w);
+                        getHist("HistNTrkl_Q",(*jet_NumTrkPt500PV)[0], w);
+                        getHist("HistLeadingJetPt_TruthQ",(*jet_pt)[0], w);
+                        if(isTaggedG_Lead) getHist("HistLeadingJetPt_TruthQ_TaggedG",(*jet_pt)[0], w);
                     }
                     if (truthSub == 1) {
-                        HistNTrks_G->Fill((*jet_NumTrkPt500PV)[1], w);
-                        HistSubJetPt_TruthG->Fill((*jet_pt)[1], w);
-                        if (isTaggedG_Sub)HistSubJetPt_TruthG_TaggedG->Fill((*jet_pt)[1], w);
+                        getHist("HistNTrks_G",(*jet_NumTrkPt500PV)[1], w);
+                        getHist("HistSubJetPt_TruthG",(*jet_pt)[1], w);
+                        if (isTaggedG_Sub) getHist("HistSubJetPt_TruthG_TaggedG",(*jet_pt)[1], w);
                     }
                     else if (truthSub == 0) {
-                        HistNTrks_Q->Fill((*jet_NumTrkPt500PV)[1], w);
-                        HistSubJetPt_TruthQ->Fill((*jet_pt)[1], w);
-                        if (isTaggedG_Sub)HistSubJetPt_TruthQ_TaggedG->Fill((*jet_pt)[1], w);
+                        getHist("HistNTrks_Q",(*jet_NumTrkPt500PV)[1], w);
+                        getHist("HistSubJetPt_TruthQ",(*jet_pt)[1], w);
+                        if (isTaggedG_Sub) getHist("HistSubJetPt_TruthQ_TaggedG",(*jet_pt)[1], w);
                     }
                     if (truthLeading == 1 || truthSub == 1){  // GJ dijet
-                        HistMjj_TruthGJ->Fill(mjj, w);
-                        HistLeadingJetPt_TruthGJ->Fill((*jet_pt)[0], w);
-                        HistSubJetPt_TruthGJ->Fill((*jet_pt)[1], w);
+                        getHist("HistMjj_TruthGJ",mjj, w);
+                        getHist("HistLeadingJetPt_TruthGJ",(*jet_pt)[0], w);
+                        getHist("HistSubJetPt_TruthGJ",(*jet_pt)[1], w);
                     }
                     if ((truthLeading + truthSub) == 2){  // GG dijet
-                        HistMjj_TruthGG->Fill(mjj, w);
-                        HistLeadingJetPt_TruthGG->Fill((*jet_pt)[0], w);
-                        HistSubJetPt_TruthGG->Fill((*jet_pt)[1], w);
+                        getHist("HistMjj_TruthGG",mjj, w);
+                        getHist("HistLeadingJetPt_TruthGG",(*jet_pt)[0], w);
+                        getHist("HistSubJetPt_TruthGG",(*jet_pt)[1], w);
                     } else if ((truthLeading + truthSub) == 1){  // QG dijet
-                        HistMjj_TruthQG->Fill(mjj, w);
-                        HistLeadingJetPt_TruthQG->Fill((*jet_pt)[0], w);
-                        HistSubJetPt_TruthQG->Fill((*jet_pt)[1], w);
+                        getHist("HistMjj_TruthQG",mjj, w);
+                        getHist("HistLeadingJetPt_TruthQG",(*jet_pt)[0], w);
+                        getHist("HistSubJetPt_TruthQG",(*jet_pt)[1], w);
                     } else if ((truthLeading + truthSub) == 0){  // QQ dijet
-                        HistMjj_TruthQQ->Fill(mjj, w);
-                        HistLeadingJetPt_TruthQQ->Fill((*jet_pt)[0], w);
-                        HistSubJetPt_TruthQQ->Fill((*jet_pt)[1], w);
+                        getHist("HistMjj_TruthQQ",mjj, w);
+                        getHist("HistLeadingJetPt_TruthQQ",(*jet_pt)[0], w);
+                        getHist("HistSubJetPt_TruthQQ",(*jet_pt)[1], w);
                     }
                 }
     
@@ -279,22 +223,22 @@ int main(int argc,char **argv){
                 
 
                 if (numberGJet >= 1){
-                    HistMjj_GJ->Fill(mjj, w);
-                    HistLeadingJetPt_GJ->Fill((*jet_pt)[0], w);
-                    HistSubJetPt_GJ->Fill((*jet_pt)[1], w);
+                    getHist("HistMjj_GJ",mjj, w);
+                    getHist("HistLeadingJetPt_GJ",(*jet_pt)[0], w);
+                    getHist("HistSubJetPt_GJ",(*jet_pt)[1], w);
                 }
                 if (numberGJet == 2){
-                    HistMjj_GG->Fill(mjj, w);
-                    HistLeadingJetPt_GG->Fill((*jet_pt)[0], w);
-                    HistSubJetPt_GG->Fill((*jet_pt)[1], w);
+                    getHist("HistMjj_GG",mjj, w);
+                    getHist("HistLeadingJetPt_GG",(*jet_pt)[0], w);
+                    getHist("HistSubJetPt_GG",(*jet_pt)[1], w);
                 } else if (numberGJet == 1){
-                    HistMjj_QG->Fill(mjj, w);
-                    HistLeadingJetPt_QG->Fill((*jet_pt)[0], w);
-                    HistSubJetPt_QG->Fill((*jet_pt)[1], w);
+                    getHist("HistMjj_QG",mjj, w);
+                    getHist("HistLeadingJetPt_QG",(*jet_pt)[0], w);
+                    getHist("HistSubJetPt_QG",(*jet_pt)[1], w);
                 } else if (numberGJet == 0){
-                    HistMjj_QQ->Fill(mjj, w);
-                    HistLeadingJetPt_QQ->Fill((*jet_pt)[0], w);
-                    HistSubJetPt_QQ->Fill((*jet_pt)[1], w);
+                    getHist("HistMjj_QQ",mjj, w);
+                    getHist("HistLeadingJetPt_QQ",(*jet_pt)[0], w);
+                    getHist("HistSubJetPt_QQ",(*jet_pt)[1], w);
                 }
             }
         } else cout << "No " << intree << endl;
@@ -306,62 +250,10 @@ int main(int argc,char **argv){
 
     TFile *fout = TFile::Open(dataset + "_" + dataset0 + ".root", "recreate");
     Cutflow->Write();
-    HistMjj->Write();
-    HistMjj_GG->Write();
-    HistMjj_GJ->Write();
-    HistMjj_QG->Write();
-    HistMjj_QQ->Write();
-
-    HistLeadingJetPt->Write();
-    HistLeadingJetPt_GG->Write();
-    HistLeadingJetPt_GJ->Write();
-    HistLeadingJetPt_QG->Write();
-    HistLeadingJetPt_QQ->Write();
-
-    HistSubJetPt->Write();
-    HistSubJetPt_GG->Write();
-    HistSubJetPt_GJ->Write();
-    HistSubJetPt_QG->Write();
-    HistSubJetPt_QQ->Write();
-
-    HistNTrkl->Write();
-    HistNTrkl_G->Write();
-    HistNTrkl_Q->Write();
-    HistNTrks->Write();
-    HistNTrks_G->Write();
-    HistNTrks_Q->Write();
-    
-    HistyStar->Write();
-    HistLjeteta->Write();
-    HistSjeteta->Write();
-    HistLjetphi->Write();
-    HistSjetphi->Write();
-    Histdeltaeta->Write();
-    Histdeltaphi->Write();
-    
-    if (dataset=="MC"){
-        HistMjj_TruthGG->Write();
-        HistMjj_TruthGJ->Write();
-        HistMjj_TruthQG->Write();
-        HistMjj_TruthQQ->Write();
-        HistLeadingJetPt_TruthG->Write();
-        HistLeadingJetPt_TruthQ->Write();
-        HistLeadingJetPt_TruthG_TaggedG->Write();
-        HistLeadingJetPt_TruthQ_TaggedG->Write();
-        HistLeadingJetPt_TruthGG->Write();
-        HistLeadingJetPt_TruthGJ->Write();
-        HistLeadingJetPt_TruthQG->Write();
-        HistLeadingJetPt_TruthQQ->Write();
-        HistSubJetPt_TruthGG->Write();
-        HistSubJetPt_TruthGJ->Write();
-        HistSubJetPt_TruthQG->Write();
-        HistSubJetPt_TruthQQ->Write();
-        HistSubJetPt_TruthG->Write();
-        HistSubJetPt_TruthQ->Write();
-        HistSubJetPt_TruthG_TaggedG->Write();
-        HistSubJetPt_TruthQ_TaggedG->Write();
+    for(std::pair<TString, TH1F*> hist : Hist) {
+        TH1F* hist1 = hist.second;
+        hist1->Write();
     }
-
     fout->Close();
 }
 
@@ -418,40 +310,45 @@ TString getInputPath(TString dataset, TString dataset0){
     return inputPath;
 }
 
-TH1D *getHist(TString type, TString name, TString title){
-    TH1D *Hist;
-    if (type=="mass"){
-        Hist = new TH1D(name, title, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-        Hist->GetXaxis()->SetTitle("m_{jj} [GeV]");
+void getHist(TString histname, float type, float w){
+    std::cout<<"1111111"<<std::endl;
+    auto itr = Hist.find(histname); 
+    if (itr != Hist.end()) Hist[histname]->Fill(type,w);
+    else{
+        if (histname.Contains("Mjj")){
+            Hist[histname] = new TH1F(histname, histname, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
+            Hist[histname]->GetXaxis()->SetTitle("m_{jj} [GeV]");
+        }
+        if (histname.Contains("Pt")){
+            Hist[histname] = new TH1F(histname, histname, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
+            Hist[histname]->GetXaxis()->SetTitle("pT [GeV]");
+        }
+        if (histname.Contains("NTrk")){
+            Hist[histname] = new TH1F(histname, histname, 80, -0.5, 79.5);
+            Hist[histname]->GetXaxis()->SetTitle("N_{track}");
+        }
+        if (histname.Contains("yStar")){
+            Hist[histname] = new TH1F(histname, histname, 40, -1.2, 1.2);
+            Hist[histname]->GetXaxis()->SetTitle("yStar");
+        }
+        if (histname.Contains("eta")){
+            Hist[histname] = new TH1F(histname, histname, 50, -5, 5);
+            Hist[histname]->GetXaxis()->SetTitle("eta");
+        }
+        if (histname.Contains("phi")){
+            Hist[histname] = new TH1F(histname, histname, 100, -5, 5);
+            Hist[histname]->GetXaxis()->SetTitle("phi");
+        }
+        if (histname.Contains("deltaeta")){
+            Hist[histname] = new TH1F(histname, histname, 50, -5, 5);
+            Hist[histname]->GetXaxis()->SetTitle("delta_eta");
+        }
+        if (histname.Contains("deltaphi")){
+            Hist[histname] = new TH1F(histname, histname, 100, -5, 5);
+            Hist[histname]->GetXaxis()->SetTitle("delta_phi");
+        }
+        Hist[histname]->Fill(type,w);
     }
-    if (type=="pt"){
-        Hist = new TH1D(name, title, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-        Hist->GetXaxis()->SetTitle("Pt [GeV]");
-    }
-    if (type=="ntrk"){
-        Hist = new TH1D(name, title, 80, -0.5, 79.5);
-        Hist->GetXaxis()->SetTitle("N_{track}");
-    }
-    if (type=="ystar"){
-        Hist = new TH1D(name, title, 40, -1.2, 1.2);
-        Hist->GetXaxis()->SetTitle("yStar");
-    }
-    if (type=="eta"){
-        Hist = new TH1D(name, title, 50, -5, 5);
-        Hist->GetXaxis()->SetTitle("eta");
-    }
-    if (type=="phi"){
-        Hist = new TH1D(name, title, 100, -5, 5);
-        Hist->GetXaxis()->SetTitle("phi");
-    }
-    if (type=="deltaeta"){
-        Hist = new TH1D(name, title, 50, -5, 5);
-        Hist->GetXaxis()->SetTitle("delta_eta");
-    }
-    if (type=="deltaphi"){
-        Hist = new TH1D(name, title, 100, -5, 5);
-        Hist->GetXaxis()->SetTitle("delta_phi");
-    }
-    Hist->Sumw2();
-    return Hist;
+    Hist[histname]->Sumw2();
+    //return Hist;
 }
