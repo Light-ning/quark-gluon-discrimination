@@ -83,7 +83,6 @@ int main(int argc,char **argv){
   
     void *dir = gSystem->OpenDirectory(inputPath);
     TString filename = gSystem->GetDirEntry(dir);
-    std::cout<<"2"<<filename<<std::endl;
     while (filename != ""){
 
         if (!filename.Contains(".root")){
@@ -91,9 +90,7 @@ int main(int argc,char **argv){
             continue;
         }
         TFile *f = TFile::Open(inputPath + filename);
-        std::cout<<"222222"<<std::endl;
         TTree *t = (TTree*) f->Get(intree);
-        std::cout<<"3333"<<std::endl;
 
         if ((t != 0)){
 
@@ -252,6 +249,8 @@ int main(int argc,char **argv){
     Cutflow->Write();
     for(std::pair<TString, TH1F*> hist : Hist) {
         TH1F* hist1 = hist.second;
+		std::cout<<"111111111"<<hist1<<std::endl;
+    	hist1->Sumw2();
         hist1->Write();
     }
     fout->Close();
@@ -311,7 +310,6 @@ TString getInputPath(TString dataset, TString dataset0){
 }
 
 void getHist(TString histname, float type, float w){
-    std::cout<<"1111111"<<std::endl;
     auto itr = Hist.find(histname); 
     if (itr != Hist.end()) Hist[histname]->Fill(type,w);
     else{
@@ -349,6 +347,6 @@ void getHist(TString histname, float type, float w){
         }
         Hist[histname]->Fill(type,w);
     }
-    Hist[histname]->Sumw2();
+    //Hist[histname]->Sumw2();
     //return Hist;
 }
