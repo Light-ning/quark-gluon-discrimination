@@ -27,3 +27,6 @@ gStyle.SetOptStat(0)
 
 HistLeadingJetPt_TruthG_TaggedG_eff.Draw()
 
+c.Print("./output/Leading_eff.pdf")
+
+x = input()
