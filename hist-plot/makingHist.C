@@ -42,7 +42,7 @@ bool getGluonSelection(float pt, float ntrack);
 int getPartonLabel(int partonlabelid);
 TString getInputPath(TString dataset, TString dataset0);
 void getHist(TString histname, float type, float w);
-std::map<TString, TH1F* > Hist;
+std::map<TString, TH1F > Hist;
 
 int main(int argc,char **argv){
     TString dataset = argv[1];
@@ -165,8 +165,8 @@ int main(int argc,char **argv){
                 getHist("HistSjeteta",(*jet_eta)[1], w);
                 getHist("HistLjetphi",(*jet_phi)[0], w);
                 getHist("HistSjetphi",(*jet_phi)[1], w);
-                getHist("Histdeltaeta",(*jet_eta)[0]-(*jet_eta)[1], w);
-                getHist("Histdeltaphi",(*jet_phi)[0]-(*jet_phi)[1], w);
+                //getHist("Histdeltaeta",((*jet_eta)[0]-(*jet_eta)[1]), w);
+                //getHist("Histdeltaphi",(*jet_phi)[0]-(*jet_phi)[1], w);
                 getHist("HistNTrkl",(*jet_NumTrkPt500PV)[0], w);
                 getHist("HistNTrks",(*jet_NumTrkPt500PV)[1], w);
 
@@ -251,10 +251,10 @@ int main(int argc,char **argv){
     TFile *fout = TFile::Open(dataset + "_" + dataset0 + ".root", "recreate");
     Cutflow->Write();
 	Cutflow_w->Write();
-    for(std::pair<TString, TH1F*> hist : Hist) {
-        TH1F* hist1 = hist.second;
-    	hist1->Sumw2();
-        hist1->Write();
+    for(std::pair<TString, TH1F> hist : Hist) {
+        TH1F hist1 = hist.second;
+    	hist1.Sumw2();
+        hist1.Write();
     }
 	fout->Write();
     fout->Close();
@@ -315,41 +315,42 @@ TString getInputPath(TString dataset, TString dataset0){
 
 void getHist(TString histname, float type, float w){
     auto itr = Hist.find(histname); 
-    if (itr != Hist.end()) Hist[histname]->Fill(type,w);
+    if (itr != Hist.end()) Hist[histname].Fill(type,w);
     else{
         if (histname.Contains("Mjj")){
-            Hist[histname] = new TH1F(histname, histname, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-            Hist[histname]->GetXaxis()->SetTitle("m_{jj} [GeV]");
+         TH1F hist(histname, histname, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
+			Hist[histname] = hist;
+            Hist[histname].GetXaxis()->SetTitle("m_{jj} [GeV]");
         }
-        if (histname.Contains("Pt")){
-            Hist[histname] = new TH1F(histname, histname, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-            Hist[histname]->GetXaxis()->SetTitle("pT [GeV]");
-        }
-        if (histname.Contains("NTrk")){
-            Hist[histname] = new TH1F(histname, histname, 80, -0.5, 79.5);
-            Hist[histname]->GetXaxis()->SetTitle("N_{track}");
-        }
-        if (histname.Contains("yStar")){
-            Hist[histname] = new TH1F(histname, histname, 40, -1.2, 1.2);
-            Hist[histname]->GetXaxis()->SetTitle("yStar");
-        }
-        if (histname.Contains("eta")){
-            Hist[histname] = new TH1F(histname, histname, 50, -5, 5);
-            Hist[histname]->GetXaxis()->SetTitle("eta");
-        }
-        if (histname.Contains("phi")){
-            Hist[histname] = new TH1F(histname, histname, 100, -5, 5);
-            Hist[histname]->GetXaxis()->SetTitle("phi");
-        }
-        if (histname.Contains("deltaeta")){
-            Hist[histname] = new TH1F(histname, histname, 50, -5, 5);
-            Hist[histname]->GetXaxis()->SetTitle("delta_eta");
-        }
-        if (histname.Contains("deltaphi")){
-            Hist[histname] = new TH1F(histname, histname, 100, -5, 5);
-            Hist[histname]->GetXaxis()->SetTitle("delta_phi");
-        }
-        Hist[histname]->Fill(type,w);
+//        if (histname.Contains("Pt")){
+//            Hist[histname] = new TH1F(histname, histname, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
+//            Hist[histname]->GetXaxis()->SetTitle("pT [GeV]");
+//        }
+//        if (histname.Contains("NTrk")){
+//            Hist[histname] = new TH1F(histname, histname, 80, -0.5, 79.5);
+//            Hist[histname]->GetXaxis()->SetTitle("N_{track}");
+//        }
+//        if (histname.Contains("yStar")){
+//            Hist[histname] = new TH1F(histname, histname, 40, -1.2, 1.2);
+//            Hist[histname]->GetXaxis()->SetTitle("yStar");
+//        }
+//        if (histname.Contains("eta")){
+//            Hist[histname] = new TH1F(histname, histname, 50, -5, 5);
+//            Hist[histname]->GetXaxis()->SetTitle("eta");
+//        }
+//        if (histname.Contains("phi")){
+//            Hist[histname] = new TH1F(histname, histname, 100, -5, 5);
+//            Hist[histname]->GetXaxis()->SetTitle("phi");
+//        }
+//        if (histname.Contains("deltaeta")){
+//            Hist[histname] = new TH1F(histname, histname, 50, -5, 5);
+//            Hist[histname]->GetXaxis()->SetTitle("delta_eta");
+//        }
+//        if (histname.Contains("deltaphi")){
+//            Hist[histname] = new TH1F(histname, histname, 100, -5, 5);
+//            Hist[histname]->GetXaxis()->SetTitle("delta_phi");
+//        }
+        Hist[histname].Fill(type,w);
     }
     //Hist[histname]->Sumw2();
     //return Hist;
