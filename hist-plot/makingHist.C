@@ -50,6 +50,7 @@ int main(int argc,char **argv){
     TString intree = argv[3];
 
     TH1F *Cutflow = new TH1F("cutflow", "cutflow", 9, 0.5, 9.5);
+    TH1F *Cutflow_w = new TH1F("cutflow_weight", "cutflow_weight", 9, 0.5, 9.5);
 
     // variables used
     vector<float> *jet_pt = 0, *jet_NumTrkPt500PV = 0, *jet_eta = 0, *jet_phi = 0;
@@ -136,23 +137,25 @@ int main(int argc,char **argv){
                 }
                 
                 vector<string>::iterator location = find(passedTriggers->begin(), passedTriggers->end(), trigger);
-                Cutflow->Fill(1, w);
-                Cutflow->Fill(2, w);
+                Cutflow->Fill(1);
+                Cutflow->Fill(2);
                 if ((*jet_clean_passLooseBad)[0] == 0) continue;
                 if ((*jet_clean_passLooseBad)[1] == 0) continue;
-                Cutflow->Fill(3, w);
+                Cutflow->Fill(3);
                 if (location == passedTriggers->end()) continue;
-                Cutflow->Fill(4, w);
-                Cutflow->Fill(5, w);
+                Cutflow->Fill(4);
+                Cutflow->Fill(5);
                 if ((*jet_pt)[0] < leadingJetPtMin) continue;
-                Cutflow->Fill(6, w);
+                Cutflow->Fill(6);
                 if (mjj < mjjMin) continue;
-                Cutflow->Fill(7, w);
+                Cutflow->Fill(7);
                 if (abs(yStar) > yStarMax) continue;
-                Cutflow->Fill(8, w);
+                Cutflow->Fill(8);
                 if (abs((*jet_eta)[0]) >= etaMax) continue;
                 if (abs((*jet_eta)[1]) >= etaMax) continue;
-                Cutflow->Fill(9, w);
+                Cutflow->Fill(9);
+				Cutflow_w = (TH1F*)Cutflow->Clone("Cutflow_weight");
+				Cutflow_w->Scale(w);
                
                 getHist("HistMjj", mjj ,w);
                 getHist("HistyStar", yStar ,w);
@@ -247,12 +250,13 @@ int main(int argc,char **argv){
 
     TFile *fout = TFile::Open(dataset + "_" + dataset0 + ".root", "recreate");
     Cutflow->Write();
+	Cutflow_w->Write();
     for(std::pair<TString, TH1F*> hist : Hist) {
         TH1F* hist1 = hist.second;
-		std::cout<<"111111111"<<hist1<<std::endl;
     	hist1->Sumw2();
         hist1->Write();
     }
+	fout->Write();
     fout->Close();
 }
 
