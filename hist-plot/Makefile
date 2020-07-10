@@ -1,7 +1,11 @@
 # Default target
-default: makingHist drawk draw
+default: makingHist drawk draw makingHist_signal
 
 # Rule for makingHist
+makingHist_signal: makingHist_signal.C 
+	g++ makingHist_signal.C `root-config --cflags --glibs` -o makingHist_signal
+
+
 makingHist: makingHist.C 
 	g++ makingHist.C `root-config --cflags --glibs` -o makingHist
 
