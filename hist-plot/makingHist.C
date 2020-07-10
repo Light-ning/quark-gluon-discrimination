@@ -314,10 +314,7 @@ TString getInputPath(TString dataset, TString dataset0){
 
 void getHist(TString histname, float type, float w){
     auto itr = Hist.find(histname); 
-    if (itr != Hist.end()) {
-		Hist[histname].Sumw2();
-		Hist[histname].Fill(type,w);
-	}
+    if (itr != Hist.end()) Hist[histname].Fill(type,w);
     else{
         if (histname.Contains("Mjj")){
          TH1F hist(histname, histname, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
