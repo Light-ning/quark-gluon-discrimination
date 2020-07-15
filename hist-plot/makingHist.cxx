@@ -9,7 +9,7 @@
 
 #include "TEnv.h"
 #include "TFile.h"
-#include "TH1F.h"
+#include "TH1D.h"
 #include "TString.h"
 #include "TCanvas.h"
 #include "TTree.h"
@@ -42,15 +42,15 @@ bool getGluonSelection(float pt, float ntrack);
 int getPartonLabel(int partonlabelid);
 TString getInputPath(TString dataset, TString dataset0);
 void getHist(TString histname, float type, float w);
-std::map<TString, TH1F > Hist;
+std::map<TString, TH1D* > Hist;
 
 int main(int argc,char **argv){
     TString dataset = argv[1];
     TString dataset0 = argv[2];
     TString intree = argv[3];
 
-    TH1F *Cutflow = new TH1F("cutflow", "cutflow", 9, 0.5, 9.5);
-    TH1F *Cutflow_w = new TH1F("cutflow_weight", "cutflow_weight", 9, 0.5, 9.5);
+    TH1D *Cutflow = new TH1D("cutflow", "cutflow", 9, 0.5, 9.5);
+    TH1D *Cutflow_w = new TH1D("cutflow_weight", "cutflow_weight", 9, 0.5, 9.5);
 
     // variables used
     vector<float> *jet_pt = 0, *jet_NumTrkPt500PV = 0, *jet_eta = 0, *jet_phi = 0;
@@ -62,6 +62,8 @@ int main(int argc,char **argv){
 
     TString inputPath = getInputPath(dataset, dataset0);
 
+    cout << "InputPath "<< inputPath <<endl;
+
     // Get TotalEventWeight here
     if (dataset=="MC"){
         void *dir0 = gSystem->OpenDirectory(inputPath);
@@ -72,7 +74,7 @@ int main(int argc,char **argv){
                 continue;
             }
             TFile *f = TFile::Open(inputPath + filename0);
-            TH1F *h = (TH1F*) f->Get("cutflow_weighted");
+            TH1D *h = (TH1D*) f->Get("cutflow_weighted");
         
             if (h != 0){
                 sampleEvents += h->GetBinContent(1);
@@ -93,7 +95,9 @@ int main(int argc,char **argv){
         TFile *f = TFile::Open(inputPath + filename);
         TTree *t = (TTree*) f->Get(intree);
 
+
         if ((t != 0)){
+	    cout <<"Open "<< inputPath + filename << endl;
 
             // set the needed branch status and branch address
             // to get variables from the ttree
@@ -126,9 +130,12 @@ int main(int argc,char **argv){
 
             // loop all the entries in the ttree
             int nEntries = t->GetEntries();
-
+	    int nDivisions = (int) nEntries/100;
+//	    cout <<" Total Entries "<< nEntries << endl;
             for (int i = 0; i < nEntries; i++){
                 t->GetEntry(i);
+		if( i % nDivisions ==0)
+			cout <<"Process "<< i <<" / "  << nEntries <<endl;
 
                 // calculate weight
                 // and fill mjj, leading jet pt, sub leading jet pt and ntrack hist
@@ -154,7 +161,7 @@ int main(int argc,char **argv){
                 if (abs((*jet_eta)[0]) >= etaMax) continue;
                 if (abs((*jet_eta)[1]) >= etaMax) continue;
                 Cutflow->Fill(9);
-				Cutflow_w = (TH1F*)Cutflow->Clone("Cutflow_weight");
+				Cutflow_w = (TH1D*)Cutflow->Clone("Cutflow_weight");
 				Cutflow_w->Scale(w);
                
                 getHist("HistMjj", mjj ,w);
@@ -248,14 +255,16 @@ int main(int argc,char **argv){
         filename = gSystem->GetDirEntry(dir);
     }
 
-    TFile *fout = TFile::Open(dataset + "_" + dataset0 + ".root", "recreate");
+    TString outname = dataset + "_" + dataset0 + ".root";
+    cout <<"Save output: " <<  outname <<endl;
+    TFile *fout = TFile::Open("./output/"+outname, "recreate");
     Cutflow->Write();
 	//Cutflow_w->Write();
-    for(std::pair<TString, TH1F> hist : Hist) {
-        TH1F hist1 = hist.second;
-        hist1.Write();
+    for(std::pair<TString, TH1D*> hist : Hist) {
+        TH1D* hist1 = (TH1D*) hist.second;
+        hist1->Write();
     }
-	fout->Write();
+    fout->Write();
     fout->Close();
 }
 
@@ -271,7 +280,8 @@ int main(int argc,char **argv){
 bool getGluonSelection(float pt, float ntrack){
     // G = 1, Q = 0
     double value = log(pt);
-    double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
+    int SigmoidnTrack = (int)(gluonTrackSlope * value + gluonTrackOffset);
+    //double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
     if (ntrack > SigmoidnTrack) return 1;
     else return 0;
 }
@@ -314,50 +324,58 @@ TString getInputPath(TString dataset, TString dataset0){
 
 void getHist(TString histname, float type, float w){
     auto itr = Hist.find(histname); 
-    if (itr != Hist.end()) Hist[histname].Fill(type,w);
+    TH1D* hist=0;
+    if (itr != Hist.end()) hist = (TH1D*) itr->second;
     else{
+	cout <<"Create " << histname <<endl;
+
         if (histname.Contains("Mjj")){
-         TH1F hist(histname, histname, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-			Hist[histname] = hist;
-            Hist[histname].GetXaxis()->SetTitle("m_{jj} [GeV]");
+  	  hist=new TH1D(histname, histname, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
+          hist->GetXaxis()->SetTitle("m_{jj} [GeV]");
+
         }
-        if (histname.Contains("Pt")){
-			TH1F hist(histname, histname, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
-			Hist[histname] = hist;
-            Hist[histname].GetXaxis()->SetTitle("pT [GeV]");
+        else if (histname.Contains("Pt")){
+	  hist = new TH1D(histname, histname, sizeof(binLowMassGeV) / sizeof(binLowMassGeV[0]) - 1, binLowMassGeV);
+          hist->GetXaxis()->SetTitle("pT [GeV]");
         }
-        if (histname.Contains("NTrk")){
-            TH1F hist(histname, histname, 80, -0.5, 79.5);
-			Hist[histname] = hist;
-            Hist[histname].GetXaxis()->SetTitle("N_{track}");
+        else if (histname.Contains("NTrk")){
+            hist = new TH1D(histname, histname, 80, -0.5, 79.5);
+            hist->GetXaxis()->SetTitle("N_{track}");
         }
-        if (histname.Contains("yStar")){
-            TH1F hist(histname, histname, 40, -1.2, 1.2);
-			Hist[histname] = hist;
-            Hist[histname].GetXaxis()->SetTitle("yStar");
+        else if (histname.Contains("yStar")){
+            hist = new TH1D(histname, histname, 40, -1.2, 1.2);
+            hist->GetXaxis()->SetTitle("yStar");
         }
-        if (histname.Contains("eta")){
-            TH1F hist(histname, histname, 50, -5, 5);
-			Hist[histname] = hist;
-            Hist[histname].GetXaxis()->SetTitle("eta");
+        else if (histname.Contains("eta")){
+            hist = new TH1D(histname, histname, 50, -5, 5);
+            hist->GetXaxis()->SetTitle("eta");
         }
-        if (histname.Contains("phi")){
-            TH1F hist(histname, histname, 100, -5, 5);
-			Hist[histname] = hist;
-            Hist[histname].GetXaxis()->SetTitle("phi");
+        else if (histname.Contains("phi")){
+            hist = new TH1D(histname, histname, 100, -5, 5);
+            hist->GetXaxis()->SetTitle("phi");
         }
-        if (histname.Contains("deltaeta")){
-            TH1F hist(histname, histname, 50, -5, 5);
-			Hist[histname] = hist;
-            Hist[histname].GetXaxis()->SetTitle("delta_eta");
+        else if (histname.Contains("deltaeta")){
+            hist = new TH1D(histname, histname, 50, -5, 5);
+            hist->GetXaxis()->SetTitle("delta_eta");
         }
-        if (histname.Contains("deltaphi")){
-            TH1F hist(histname, histname, 100, -5, 5);
-			Hist[histname] = hist;
-            Hist[histname].GetXaxis()->SetTitle("delta_phi");
+        else if (histname.Contains("deltaphi")){
+            hist = new TH1D(histname, histname, 100, -5, 5);
+            hist-> GetXaxis()->SetTitle("delta_phi");
         }
-		Hist[histname].Sumw2();
-        Hist[histname].Fill(type,w);
+	else{
+		cout <<"Undefined Histogram: "<< histname <<endl;
+	}
+
+	if(hist){
+		//Set Directory to null instead of default Opened file. Histograms will be deleted at closing file
+		hist->SetDirectory(0);
+		//Enable error propagation of the histograms before filling it
+		hist->Sumw2();
+		//Insert new hitograms to the map
+		Hist[histname]=hist;
+	}
     }
-    //return Hist;
+    if(hist) 
+	hist->Fill(type,w);
+    
 }
