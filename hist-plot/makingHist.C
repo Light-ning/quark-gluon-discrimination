@@ -377,7 +377,8 @@ int main(int argc,char **argv){
 bool getGluonSelection(float pt, float ntrack){
     // G = 1, Q = 0
     double value = log(pt);
-    double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
+    int SigmoidnTrack = (int)(gluonTrackSlope * value + gluonTrackOffset);
+    //double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
     if (ntrack > SigmoidnTrack) return 1;
     else return 0;
 }
