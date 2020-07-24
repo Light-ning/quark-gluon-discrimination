@@ -1,0 +1,10 @@
+To compile:  
+>>make
+
+To run histograms maker: 
+>> cd macro
+>>./run_QCD.sh
+
+
+Input folder: txt files containing path to ntuples.
+Results in output folder.

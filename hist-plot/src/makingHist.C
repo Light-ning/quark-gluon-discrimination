@@ -44,8 +44,10 @@ TH1D *getHist(TString type, TString name, TString title);
 
 int main(int argc,char **argv){
     TString dataset = argv[1];
-    TString dataset0 = argv[2];
-    TString intree = argv[3];
+    string period = argv[2];// a, d, or e
+    TString mass = argv[3];
+    string num = argv[4]; // data period or mc slice
+ 
     // Mass Hist
     TH1D *HistMjj = getHist("mass", "HistMjj", "mjj");
     TH1D *HistMjj_TruthGG = getHist("mass", "HistMjj_TruthGG", "mjj in truth labelled GG events");
@@ -109,6 +111,7 @@ int main(int argc,char **argv){
     TH1D *Histdeltaeta = getHist("deltaeta", "Histdeltaeta", "deltaeta");
     TH1D *Histdeltaphi = getHist("deltaphi", "Histdeltaphi", "deltaphi");
     TH1D *Cutflow = new TH1D("cutflow", "cutflow", 9, 0.5, 9.5);
+    TH1D *Cutflow_weight = new TH1D("cutflow_weight", "cutflow_weight", 9, 0.5, 9.5);
 
     // variables used
     vector<float> *jet_pt = 0, *jet_NumTrkPt500PV = 0, *jet_eta = 0, *jet_phi = 0;
@@ -118,38 +121,28 @@ int main(int argc,char **argv){
     float mjj, weight, yStar;
     double w = 1, sampleEvents = 0;
 
-    TString inputPath = getInputPath(dataset, dataset0);
+//TString inputPath = getInputPath(dataset, dataset0);
 
     // Get TotalEventWeight here
-    if (dataset=="MC"){
-        void *dir0 = gSystem->OpenDirectory(inputPath);
-        TString filename0 = gSystem->GetDirEntry(dir0);
-        while (filename0 != ""){
-            if (!filename0.Contains(".root")){
-                filename0 = gSystem->GetDirEntry(dir0);
-                continue;
-            }
-            TFile *f = TFile::Open(inputPath + filename0);
-            TH1D *h = (TH1D*) f->Get("cutflow_weighted");
-        
-            if (h != 0){
-                sampleEvents += h->GetBinContent(1);
-            } else cout << "No cutflow_weighted in " << filename0 << endl;
 
-            filename0 = gSystem->GetDirEntry(dir0);
-        }
-    }
-  
-    void *dir = gSystem->OpenDirectory(inputPath);
-    TString filename = gSystem->GetDirEntry(dir);
-    while (filename != ""){
-
-        if (!filename.Contains(".root")){
-            filename = gSystem->GetDirEntry(dir);
-            continue;
-        }
-        TFile *f = TFile::Open(inputPath + filename);
-        TTree *t = (TTree*) f->Get(intree);
+	ifstream infile;
+	string root_list="";
+	infile.open("../Input/"+dataset+".txt");
+	string p = "mc16"+period;
+	string slice = "JZ"+num+"W";
+	string datap = "data"+num;
+	while(getline(infile,root_list)){
+		if(((root_list.find(mass) != string::npos) && (root_list.find(p) != string::npos)) || (root_list.find(slice) != string::npos) || (root_list.find(datap) != string::npos)){
+			cout<<"in file: "<<root_list.c_str()<<endl;;
+			TFile *f = TFile::Open(root_list.c_str());
+			TTree *t = (TTree*) f->Get("outTree");
+			if (dataset.Contains("MC")){
+				TH1D *h = (TH1D*) f->Get("cutflow_weighted");
+			
+				if (h != 0){
+					sampleEvents += h->GetBinContent(1);
+				} else cout << "No cutflow_weighted in " << root_list.c_str() << endl;
+			}
 
         if ((t != 0)){
 
@@ -177,7 +170,7 @@ int main(int argc,char **argv){
             t->SetBranchAddress("jet_eta", &jet_eta);
             t->SetBranchAddress("jet_phi", &jet_phi);
             t->SetBranchAddress("jet_clean_passLooseBad", &jet_clean_passLooseBad);
-            if (dataset=="MC"){
+            if (dataset.Contains("MC")){
                 t->SetBranchStatus("jet_PartonTruthLabelID", 1);
                 t->SetBranchAddress("jet_PartonTruthLabelID", &jet_PartonTruthLabelID);
             }
@@ -190,28 +183,29 @@ int main(int argc,char **argv){
 
                 // calculate weight
                 // and fill mjj, leading jet pt, sub leading jet pt and ntrack hist
-                if (dataset=="MC"){
+                if (dataset.Contains("MC")){
                     w = weight / sampleEvents;
                 }
                 
                 vector<string>::iterator location = find(passedTriggers->begin(), passedTriggers->end(), trigger);
-                Cutflow->Fill(1, w);
-                Cutflow->Fill(2, w);
+                Cutflow->Fill(1);
+                Cutflow->Fill(2);
                 if ((*jet_clean_passLooseBad)[0] == 0) continue;
                 if ((*jet_clean_passLooseBad)[1] == 0) continue;
-                Cutflow->Fill(3, w);
+                Cutflow->Fill(3);
                 if (location == passedTriggers->end()) continue;
-                Cutflow->Fill(4, w);
-                Cutflow->Fill(5, w);
+                Cutflow->Fill(4);
+                Cutflow->Fill(5);
                 if ((*jet_pt)[0] < leadingJetPtMin) continue;
-                Cutflow->Fill(6, w);
+                Cutflow->Fill(6);
                 if (mjj < mjjMin) continue;
-                Cutflow->Fill(7, w);
+                Cutflow->Fill(7);
                 if (abs(yStar) > yStarMax) continue;
-                Cutflow->Fill(8, w);
+                Cutflow->Fill(8);
                 if (abs((*jet_eta)[0]) >= etaMax) continue;
                 if (abs((*jet_eta)[1]) >= etaMax) continue;
-                Cutflow->Fill(9, w);
+                Cutflow->Fill(9);
+				Cutflow_weight->Add(Cutflow,w);
                 
                 HistMjj->Fill(mjj, w);
                 HistyStar->Fill(yStar, w);
@@ -227,7 +221,7 @@ int main(int argc,char **argv){
                 HistNTrks->Fill((*jet_NumTrkPt500PV)[1], w);
 
                 // parton truth label
-                if (dataset=="MC"){
+                if (dataset.Contains("MC")){
                     int truthLeading = getPartonLabel((*jet_PartonTruthLabelID)[0]);
                     int truthSub = getPartonLabel((*jet_PartonTruthLabelID)[1]);
                     int isTaggedG_Lead = getGluonSelection((*jet_pt)[0], (*jet_NumTrkPt500PV)[0]);
@@ -297,72 +291,73 @@ int main(int argc,char **argv){
                     HistSubJetPt_QQ->Fill((*jet_pt)[1], w);
                 }
             }
-        } else cout << "No " << intree << endl;
+        } else cout << "No outtree" << endl;
 
-        f->Close();
-        delete f, t;
-        filename = gSystem->GetDirEntry(dir);
-    }
+			f->Close();
+			delete f, t;
 
-    TFile *fout = TFile::Open(dataset + "_" + dataset0 + ".root", "recreate");
-    Cutflow->Write();
-    HistMjj->Write();
-    HistMjj_GG->Write();
-    HistMjj_GJ->Write();
-    HistMjj_QG->Write();
-    HistMjj_QQ->Write();
+			TFile *fout = TFile::Open("../output/"+dataset + "_" +mass+"_"+p+"_"+num+".root", "recreate");
+			Cutflow->Write();
+			Cutflow_weight->Write();
+			HistMjj->Write();
+			HistMjj_GG->Write();
+			HistMjj_GJ->Write();
+			HistMjj_QG->Write();
+			HistMjj_QQ->Write();
 
-    HistLeadingJetPt->Write();
-    HistLeadingJetPt_GG->Write();
-    HistLeadingJetPt_GJ->Write();
-    HistLeadingJetPt_QG->Write();
-    HistLeadingJetPt_QQ->Write();
+			HistLeadingJetPt->Write();
+			HistLeadingJetPt_GG->Write();
+			HistLeadingJetPt_GJ->Write();
+			HistLeadingJetPt_QG->Write();
+			HistLeadingJetPt_QQ->Write();
 
-    HistSubJetPt->Write();
-    HistSubJetPt_GG->Write();
-    HistSubJetPt_GJ->Write();
-    HistSubJetPt_QG->Write();
-    HistSubJetPt_QQ->Write();
+			HistSubJetPt->Write();
+			HistSubJetPt_GG->Write();
+			HistSubJetPt_GJ->Write();
+			HistSubJetPt_QG->Write();
+			HistSubJetPt_QQ->Write();
 
-    HistNTrkl->Write();
-    HistNTrkl_G->Write();
-    HistNTrkl_Q->Write();
-    HistNTrks->Write();
-    HistNTrks_G->Write();
-    HistNTrks_Q->Write();
-    
-    HistyStar->Write();
-    HistLjeteta->Write();
-    HistSjeteta->Write();
-    HistLjetphi->Write();
-    HistSjetphi->Write();
-    Histdeltaeta->Write();
-    Histdeltaphi->Write();
-    
-    if (dataset=="MC"){
-        HistMjj_TruthGG->Write();
-        HistMjj_TruthGJ->Write();
-        HistMjj_TruthQG->Write();
-        HistMjj_TruthQQ->Write();
-        HistLeadingJetPt_TruthG->Write();
-        HistLeadingJetPt_TruthQ->Write();
-        HistLeadingJetPt_TruthG_TaggedG->Write();
-        HistLeadingJetPt_TruthQ_TaggedG->Write();
-        HistLeadingJetPt_TruthGG->Write();
-        HistLeadingJetPt_TruthGJ->Write();
-        HistLeadingJetPt_TruthQG->Write();
-        HistLeadingJetPt_TruthQQ->Write();
-        HistSubJetPt_TruthGG->Write();
-        HistSubJetPt_TruthGJ->Write();
-        HistSubJetPt_TruthQG->Write();
-        HistSubJetPt_TruthQQ->Write();
-        HistSubJetPt_TruthG->Write();
-        HistSubJetPt_TruthQ->Write();
-        HistSubJetPt_TruthG_TaggedG->Write();
-        HistSubJetPt_TruthQ_TaggedG->Write();
-    }
+			HistNTrkl->Write();
+			HistNTrkl_G->Write();
+			HistNTrkl_Q->Write();
+			HistNTrks->Write();
+			HistNTrks_G->Write();
+			HistNTrks_Q->Write();
+			
+			HistyStar->Write();
+			HistLjeteta->Write();
+			HistSjeteta->Write();
+			HistLjetphi->Write();
+			HistSjetphi->Write();
+			Histdeltaeta->Write();
+			Histdeltaphi->Write();
+			
+			if (dataset.Contains("MC")){
+				HistMjj_TruthGG->Write();
+				HistMjj_TruthGJ->Write();
+				HistMjj_TruthQG->Write();
+				HistMjj_TruthQQ->Write();
+				HistLeadingJetPt_TruthG->Write();
+				HistLeadingJetPt_TruthQ->Write();
+				HistLeadingJetPt_TruthG_TaggedG->Write();
+				HistLeadingJetPt_TruthQ_TaggedG->Write();
+				HistLeadingJetPt_TruthGG->Write();
+				HistLeadingJetPt_TruthGJ->Write();
+				HistLeadingJetPt_TruthQG->Write();
+				HistLeadingJetPt_TruthQQ->Write();
+				HistSubJetPt_TruthGG->Write();
+				HistSubJetPt_TruthGJ->Write();
+				HistSubJetPt_TruthQG->Write();
+				HistSubJetPt_TruthQQ->Write();
+				HistSubJetPt_TruthG->Write();
+				HistSubJetPt_TruthQ->Write();
+				HistSubJetPt_TruthG_TaggedG->Write();
+				HistSubJetPt_TruthQ_TaggedG->Write();
+				}
 
-    fout->Close();
+    		fout->Close();
+		}
+	}
 }
 
 // we just apply gluon seleciton here
