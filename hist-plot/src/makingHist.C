@@ -39,7 +39,6 @@ double gluonTrackSlope = 4.16218;
 //bool getQuarkSelection(float pt, float ntrack);
 bool getGluonSelection(float pt, float ntrack);
 int getPartonLabel(int partonlabelid);
-TString getInputPath(TString dataset, TString dataset0);
 TH1D *getHist(TString type, TString name, TString title);
 
 int main(int argc,char **argv){
@@ -120,8 +119,6 @@ int main(int argc,char **argv){
     int njet;
     float mjj, weight, yStar;
     double w = 1, sampleEvents = 0;
-
-//TString inputPath = getInputPath(dataset, dataset0);
 
     // Get TotalEventWeight here
 
@@ -372,8 +369,8 @@ int main(int argc,char **argv){
 bool getGluonSelection(float pt, float ntrack){
     // G = 1, Q = 0
     double value = log(pt);
-    int SigmoidnTrack = (int)(gluonTrackSlope * value + gluonTrackOffset);
-    //double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
+//    int SigmoidnTrack = (int)(gluonTrackSlope * value + gluonTrackOffset);
+    double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
     if (ntrack >= SigmoidnTrack) return 1;
     else return 0;
 }
@@ -386,32 +383,6 @@ int getPartonLabel(int partonlabelid){
         type = 0;
     }
     return type;
-}
-
-TString getInputPath(TString dataset, TString dataset0){
-    TString inputPath;
-    if (dataset=="MC"){
-        inputPath = "/eos/atlas/atlascerngroupdisk/phys-exotics/jdm/dibjet/FullRUN2/NewCleaningMC/";
-        if (dataset0 == "MC16a_JZ4W"){
-            inputPath += "QCD_MC16a/user.bdong.mc16_13TeV.364704.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ4WithSW.m16a_newJetCleaning_May9_tree.root/";
-            return inputPath;
-        }
-        if (dataset0.Contains("MC16")){
-            TString period = dataset0(dataset0.Index("MC16") + 4);
-            if (!(dataset0.Contains("JZ") && dataset0.Contains("W"))){
-                cout << "Wrong dataset tag: " << dataset0 << endl;
-                return "";
-            }
-            TString jzxw = dataset0(dataset0.Index("JZ") + 2, dataset0.Index("W") - dataset0.Index("JZ") - 2);
-            inputPath += "QCD_MC16" + period;
-            inputPath += "/user.bdong.mc16_13TeV.3647" + ((jzxw.Length() == 1) ? ("0" + jzxw) : (jzxw)) + ".Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ" + jzxw + "WithSW.mc16" + period + "_newJetCleaning_May9_tree.root/";
-        }
-    }
-    else if (dataset.Contains("Data")){
-        inputPath = "/eos/atlas/atlascerngroupdisk/phys-exotics/jdm/dibjet/FullRUN2/NewCleaningData/";
-        inputPath += dataset + "/" + dataset0 + "/";
-    }
-    return inputPath;
 }
 
 TH1D *getHist(TString type, TString name, TString title){
