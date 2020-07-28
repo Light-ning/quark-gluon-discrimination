@@ -1,0 +1,10 @@
+/eos/user/w/wasu/string/user.krybacki.Pythia8_STR_Ms07000mca_tree.root/user.krybacki.21977422._000001.tree.root
+/eos/user/w/wasu/string/user.krybacki.Pythia8_STR_Ms07000mcd_tree.root/user.krybacki.21977762._000001.tree.root
+/eos/user/w/wasu/string/user.krybacki.Pythia8_STR_Ms07500_2mcd_tree.root/user.krybacki.21977779._000001.tree.root
+/eos/user/w/wasu/string/user.krybacki.Pythia8_STR_Ms07500mca_tree.root/user.krybacki.21977423._000001.tree.root
+/eos/user/w/wasu/string/user.krybacki.Pythia8_STR_Ms08000_3mcd_tree.root/user.krybacki.21977797._000001.tree.root
+/eos/user/w/wasu/string/user.krybacki.Pythia8_STR_Ms08000mca_tree.root/user.krybacki.21977434._000001.tree.root
+/eos/user/w/wasu/string/user.krybacki.Pythia8_STR_Ms08500_2mcd_tree.root/user.krybacki.21977843._000001.tree.root
+/eos/user/w/wasu/string/user.krybacki.Pythia8_STR_Ms08500mca_tree.root/user.krybacki.21977510._000001.tree.root
+/eos/user/w/wasu/string/user.krybacki.Pythia8_STR_Ms09000_3mcd_tree.root/user.krybacki.21977852._000001.tree.root
+/eos/user/w/wasu/string/user.krybacki.Pythia8_STR_Ms09000mca_tree.root/user.krybacki.21977656._000001.tree.root

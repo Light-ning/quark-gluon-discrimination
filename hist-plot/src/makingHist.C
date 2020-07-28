@@ -122,24 +122,29 @@ int main(int argc,char **argv){
 
     // Get TotalEventWeight here
 
-	ifstream infile;
-	string root_list="";
-	infile.open("../Input/"+dataset+".txt");
 	string p = "mc16"+period;
+	string p1 = "mc"+period;
 	string slice = "JZ"+num+"W";
 	string datap = "data"+num;
-	while(getline(infile,root_list)){
-		if(((root_list.find(mass) != string::npos) && (root_list.find(p) != string::npos)) || (root_list.find(slice) != string::npos) || (root_list.find(datap) != string::npos)){
+	ifstream infile;
+	ifstream infile1;
+	string root_list="";
+	infile.open("../Input/"+dataset+".txt");
+	infile1.open("../Input/"+dataset+".txt");
+	while(getline(infile,root_list)){	
+		if( (dataset.Contains("MC")) && (root_list.find(slice) != string::npos)) {
 			cout<<"in file: "<<root_list.c_str()<<endl;;
 			TFile *f = TFile::Open(root_list.c_str());
+			TH1D *h = (TH1D*) f->Get("cutflow_weighted");
+			if (h != 0){
+				sampleEvents += h->GetBinContent(1);
+			} else cout << "No cutflow_weighted in " << root_list.c_str() << endl;
+		}
+	}
+	while(getline(infile1,root_list)){	
+		if(((root_list.find(mass) != string::npos) && ((root_list.find(p) != string::npos) || (root_list.find(p1) != string::npos))) || (root_list.find(slice) != string::npos) || (root_list.find(datap) != string::npos)){
+			TFile *f = TFile::Open(root_list.c_str());
 			TTree *t = (TTree*) f->Get("outTree");
-			if (dataset.Contains("MC")){
-				TH1D *h = (TH1D*) f->Get("cutflow_weighted");
-			
-				if (h != 0){
-					sampleEvents += h->GetBinContent(1);
-				} else cout << "No cutflow_weighted in " << root_list.c_str() << endl;
-			}
 
         if ((t != 0)){
 
@@ -369,8 +374,8 @@ int main(int argc,char **argv){
 bool getGluonSelection(float pt, float ntrack){
     // G = 1, Q = 0
     double value = log(pt);
-//    int SigmoidnTrack = (int)(gluonTrackSlope * value + gluonTrackOffset);
-    double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
+    int SigmoidnTrack = (int)(gluonTrackSlope * value + gluonTrackOffset);
+//    double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
     if (ntrack >= SigmoidnTrack) return 1;
     else return 0;
 }
