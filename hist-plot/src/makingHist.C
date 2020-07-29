@@ -202,7 +202,7 @@ int main(int argc,char **argv){
                 Cutflow->Fill(6);
                 if (mjj < mjjMin) continue;
                 Cutflow->Fill(7);
-                if (abs(yStar) > yStarMax) continue;
+                if (abs(yStar) >= yStarMax) continue;
                 Cutflow->Fill(8);
                 if (abs((*jet_eta)[0]) >= etaMax) continue;
                 if (abs((*jet_eta)[1]) >= etaMax) continue;
