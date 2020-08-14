@@ -193,23 +193,31 @@ int main(int argc,char **argv){
                 
                 vector<string>::iterator location = find(passedTriggers->begin(), passedTriggers->end(), trigger);
                 Cutflow->Fill(1);
+				Cutflow_weight->Fill(1,w);
                 Cutflow->Fill(2);
+				Cutflow_weight->Fill(2,w);
                 if ((*jet_clean_passLooseBad)[0] == 0) continue;
                 if ((*jet_clean_passLooseBad)[1] == 0) continue;
                 Cutflow->Fill(3);
+				Cutflow_weight->Fill(3,w);
                 if (location == passedTriggers->end()) continue;
                 Cutflow->Fill(4);
+				Cutflow_weight->Fill(4,w);
                 Cutflow->Fill(5);
+				Cutflow_weight->Fill(5,w);
                 if ((*jet_pt)[0] <= leadingJetPtMin) continue;
                 Cutflow->Fill(6);
+				Cutflow_weight->Fill(6,w);
                 if (mjj <= mjjMin) continue;
                 Cutflow->Fill(7);
+				Cutflow_weight->Fill(7,w);
                 if (abs(yStar) >= yStarMax) continue;
                 Cutflow->Fill(8);
+				Cutflow_weight->Fill(8,w);
                 if (abs((*jet_eta)[0]) >= etaMax) continue;
                 if (abs((*jet_eta)[1]) >= etaMax) continue;
                 Cutflow->Fill(9);
-				Cutflow_weight->Add(Cutflow,w);
+				Cutflow_weight->Fill(9,w);
                 
                 HistMjj->Fill(mjj, w);
                 HistyStar->Fill(yStar, w);
