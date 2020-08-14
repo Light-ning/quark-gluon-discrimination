@@ -5,6 +5,10 @@ To run histograms maker:
 >> cd macro
 >>./run_QCD.sh
 
+To get Significance:
+>> cd macro
+>>./getSignificance.sh
+
 
 Input folder: txt files containing path to ntuples.
 Results in output folder.

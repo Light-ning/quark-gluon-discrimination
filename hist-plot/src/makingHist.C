@@ -186,9 +186,10 @@ int main(int argc,char **argv){
 
                 // calculate weight
                 // and fill mjj, leading jet pt, sub leading jet pt and ntrack hist
-                if (dataset.Contains("MC")){
+                if (dataset.Contains("MC")  && (root_list.find(slice) != string::npos)){
                     w = weight / sampleEvents;
                 }
+				else if (dataset.Contains("MC")) w = weight;
                 
                 vector<string>::iterator location = find(passedTriggers->begin(), passedTriggers->end(), trigger);
                 Cutflow->Fill(1);

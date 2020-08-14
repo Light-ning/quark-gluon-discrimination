@@ -1,1 +1,1 @@
-mass : 7000 &   sigma : nan
+mass : 9000 & yield : 2.765406684 &   sigma : 1.24259003511

@@ -37,20 +37,20 @@ HistMjj_b3 = fb3.Get("HistMjj")
 
 xs = 0.
 if model == "String":
-	if m == 7000:
+	if m == "7000":
 		xs=7.09
-	elif m == 7500:
+	elif m == "7500":
 		xs=1.86
-	elif m == 8000:
+	elif m == "8000":
 		xs=4.66e-1
-	elif m == 8500:
+	elif m == "8500":
 		xs=1e-1
-	elif m == 9000:
+	elif m == "9000":
 		xs=1.99e-2
 
-HistMjj_1.Scale(xs*36.20766/HistMjj_1.GetEntries())
-HistMjj_2.Scale(xs*44.3074/HistMjj_2.GetEntries())
-HistMjj_3.Scale(xs*58.4501/HistMjj_3.GetEntries())
+HistMjj_1.Scale(xs*36.20766/HistMjj_1.Integral())
+HistMjj_2.Scale(xs*44.3074/HistMjj_2.Integral())
+HistMjj_3.Scale(xs*58.4501/HistMjj_3.Integral())
 HistMjj_b1.Scale(36.20766)
 HistMjj_b2.Scale(44.3074)
 HistMjj_b3.Scale(58.4501)
@@ -63,6 +63,7 @@ HistMjj_b1.Add(HistMjj_b3)
 
 sigma = 0.
 sigma_total = 0.
+yields = 0.
 for i in range(1,HistMjj_1.GetNbinsX()+1):
 	si = HistMjj_1.GetBinContent(i)
 	bi = HistMjj_b1.GetBinContent(i)
@@ -71,12 +72,13 @@ for i in range(1,HistMjj_1.GetNbinsX()+1):
 		sigma += 2*((si+bi)*np.log(1+(si/bi))-si)
 
 sigma_total = math.sqrt(sigma)	
+yields = HistMjj_1.Integral()
 
 #c = TCanvas("c","c",500,500)
 #gStyle.SetOptStat(0)
 outfile = open("../output/Significance_"+model+".txt","w+")
 
-line="mass : "+m+" &   sigma : "+str(sigma_total)
+line="mass : "+m+" & yield : "+str(yields)+" &   sigma : "+str(sigma_total)
 print line
 #c.Print("../output/Significance.txt")
 outfile.write(line) 
