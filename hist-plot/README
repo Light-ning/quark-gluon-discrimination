@@ -9,6 +9,11 @@ To get Significance:
 >> cd macro
 >>./getSignificance.sh
 
+or
+
+>>cd python
+>> python getSignificance_allMass.py
+
 
 Input folder: txt files containing path to ntuples.
 Results in output folder.

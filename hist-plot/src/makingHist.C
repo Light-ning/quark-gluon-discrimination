@@ -308,8 +308,8 @@ int main(int argc,char **argv){
 			f->Close();
 			delete f, t;
 
-			TFile *fout = TFile::Open("../output/"+dataset + "_" +mass+"_"+p+"_"+num+".root", "recreate");
-			//TFile *fout = TFile::Open("../output/float/"+dataset + "_" +mass+"_"+p+"_"+num+".root", "recreate");
+			//TFile *fout = TFile::Open("../output/"+dataset + "_" +mass+"_"+p+"_"+num+".root", "recreate");
+			TFile *fout = TFile::Open("../output/float/"+dataset + "_" +mass+"_"+p+"_"+num+".root", "recreate");
 			Cutflow->Write();
 			Cutflow_weight->Write();
 			HistMjj->Write();
@@ -385,8 +385,8 @@ int main(int argc,char **argv){
 bool getGluonSelection(float pt, float ntrack){
     // G = 1, Q = 0
     double value = log(pt);
-    int SigmoidnTrack = (int)(gluonTrackSlope * value + gluonTrackOffset);
-    //double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
+    //int SigmoidnTrack = (int)(gluonTrackSlope * value + gluonTrackOffset);
+    double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
     if (ntrack >= SigmoidnTrack) return 1;
     else return 0;
 }
