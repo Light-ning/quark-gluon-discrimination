@@ -23,8 +23,8 @@ def getSigma(fHistMjj, fHistMjj_b, Sig):
 			sigma += 2*((si+bi)*np.log(1+(si/bi))-si)
 
 	sigma_total = math.sqrt(sigma)	
-	yields = HistMjj.Integral()
-	yields_b = HistMjj_b.Integral()
+	yields = fHistMjj.Integral()
+	yields_b = fHistMjj_b.Integral()
 
 	#outfile = open("../output/f_Sig_GJnificance_"+model+".txt","w+")
 
@@ -43,13 +43,133 @@ f_Sig_GJ = TH1D("f_Sig_GJ","",4,6500,9000)
 f_Sig_GG = TH1D("f_Sig_GG","",4,6500,9000)
 c = TCanvas("c","c",500,500)
 
-def getYields(a,d,e,ba,bd,be,fmodel):
-	f1 = TFile(a)
-	f2 = TFile(d)
-	f3 = TFile(e)
-	fb1 = TFile(ba)
-	fb2 = TFile(bd)
-	fb3 = TFile(be)
+#def getYields(a,d,e,ba,bd,be,fmodel):
+#	f1 = TFile(a)
+#	f2 = TFile(d)
+#	f3 = TFile(e)
+#	fb1 = TFile(ba)
+#	fb2 = TFile(bd)
+#	fb3 = TFile(be)
+#
+#	HistMjj_JJ_1 = f1.Get("HistMjj")
+#	HistMjj_JJ_2 = f2.Get("HistMjj")
+#	HistMjj_JJ_3 = f3.Get("HistMjj")
+#	HistMjj_JJ_b1 = fb1.Get("HistMjj")
+#	HistMjj_JJ_b2 = fb2.Get("HistMjj")
+#	HistMjj_JJ_b3 = fb3.Get("HistMjj")
+#
+#	HistMjj_GJ_1 = f1.Get("HistMjj_GJ")
+#	HistMjj_GJ_2 = f2.Get("HistMjj_GJ")
+#	HistMjj_GJ_3 = f3.Get("HistMjj_GJ")
+#	HistMjj_GJ_b1 = fb1.Get("HistMjj_GJ")
+#	HistMjj_GJ_b2 = fb2.Get("HistMjj_GJ")
+#	HistMjj_GJ_b3 = fb3.Get("HistMjj_GJ")
+#
+#	HistMjj_GG_1 = f1.Get("HistMjj_GG")
+#	HistMjj_GG_2 = f2.Get("HistMjj_GG")
+#	HistMjj_GG_3 = f3.Get("HistMjj_GG")
+#	HistMjj_GG_b1 = fb1.Get("HistMjj_GG")
+#	HistMjj_GG_b2 = fb2.Get("HistMjj_GG")
+#	HistMjj_GG_b3 = fb3.Get("HistMjj_GG")
+#
+#	cutflow_weight_1 = f1.Get("cutflow_weight")
+#	cutflow_weight_2 = f2.Get("cutflow_weight")
+#	cutflow_weight_3 = f3.Get("cutflow_weight")
+#
+#	xs = 0.
+#	if fmodel == "String":
+#		if m == 7000:
+#			xs=7.09
+#		elif m == 7500:
+#			xs=1.86
+#		elif m == 8000:
+#			xs=4.66e-1
+#		elif m == 8500:
+#			xs=1e-1
+#		elif m == 9000:
+#			xs=1.99e-2
+##for JJ
+#	HistMjj_JJ_1.Scale(xs*36.20766/cutflow_weight_1.GetBinContent(1))
+#	HistMjj_JJ_2.Scale(xs*44.3074/cutflow_weight_2.GetBinContent(1))
+#	HistMjj_JJ_3.Scale(xs*58.4501/cutflow_weight_3.GetBinContent(1))
+#
+#	HistMjj_JJ_b1.Scale(36.20766)
+#	HistMjj_JJ_b2.Scale(44.3074)
+#	HistMjj_JJ_b3.Scale(58.4501)
+#
+#	HistMjj_JJ_1.Add(HistMjj_JJ_2)
+#	HistMjj_JJ_1.Add(HistMjj_JJ_3)
+#
+#	HistMjj_JJ_b1.Add(HistMjj_JJ_b2)
+#	HistMjj_JJ_b1.Add(HistMjj_JJ_b3)
+#
+##for GJ
+#	HistMjj_GJ_1.Scale(xs*36.20766/cutflow_weight_1.GetBinContent(1))
+#	HistMjj_GJ_2.Scale(xs*44.3074/cutflow_weight_2.GetBinContent(1))
+#	HistMjj_GJ_3.Scale(xs*58.4501/cutflow_weight_3.GetBinContent(1))
+#
+#	HistMjj_GJ_b1.Scale(36.20766)
+#	HistMjj_GJ_b2.Scale(44.3074)
+#	HistMjj_GJ_b3.Scale(58.4501)
+#
+#	HistMjj_GJ_1.Add(HistMjj_GJ_2)
+#	HistMjj_GJ_1.Add(HistMjj_GJ_3)
+#
+#	HistMjj_GJ_b1.Add(HistMjj_GJ_b2)
+#	HistMjj_GJ_b1.Add(HistMjj_GJ_b3)
+#
+##for GG
+#	HistMjj_GG_1.Scale(xs*36.20766/cutflow_weight_1.GetBinContent(1))
+#	HistMjj_GG_2.Scale(xs*44.3074/cutflow_weight_2.GetBinContent(1))
+#	HistMjj_GG_3.Scale(xs*58.4501/cutflow_weight_3.GetBinContent(1))
+#
+#	HistMjj_GG_b1.Scale(36.20766)
+#	HistMjj_GG_b2.Scale(44.3074)
+#	HistMjj_GG_b3.Scale(58.4501)
+#
+#	HistMjj_GG_1.Add(HistMjj_GG_2)
+#	HistMjj_GG_1.Add(HistMjj_GG_3)
+#
+#	HistMjj_GG_b1.Add(HistMjj_GG_b2)
+#	HistMjj_GG_b1.Add(HistMjj_GG_b3)
+#
+#	return HistMjj_JJ_1, HistMjj_JJ_b1, HistMjj_GJ_1, HistMjj_GJ_b1 ,HistMjj_GG_1, HistMjj_GG_b1
+def getScale(HistMjj_JJ_1,HistMjj_JJ_2,HistMjj_JJ_3,cutflow_weight_1,cutflow_weight_2,cutflow_weight_3,HistMjj_JJ_b1,HistMjj_JJ_b2, HistMjj_JJ_b3, xs):
+	
+	HistMjj_JJ_1.Scale(xs*36.20766/cutflow_weight_1.GetBinContent(1))
+	HistMjj_JJ_2.Scale(xs*44.3074/cutflow_weight_2.GetBinContent(1))
+	HistMjj_JJ_3.Scale(xs*58.4501/cutflow_weight_3.GetBinContent(1))
+
+	HistMjj_JJ_b1.Scale(36.20766)
+	HistMjj_JJ_b2.Scale(44.3074)
+	HistMjj_JJ_b3.Scale(58.4501)
+
+	HistMjj_JJ_1.Add(HistMjj_JJ_2)
+	HistMjj_JJ_1.Add(HistMjj_JJ_3)
+
+	HistMjj_JJ_b1.Add(HistMjj_JJ_b2)
+	HistMjj_JJ_b1.Add(HistMjj_JJ_b3)
+
+	return HistMjj_JJ_1, HistMjj_JJ_b1
+
+
+for m in range(7000,9500,500):
+	
+	f1 = TFile("../output/"+model+"_MC_"+str(m)+"_mc16a_dummy.root")
+	f2 = TFile("../output/"+model+"_MC_"+str(m)+"_mc16d_dummy.root")
+	f3 = TFile("../output/"+model+"_MC_"+str(m)+"_mc16e_dummy.root")
+	fb1 = TFile("../output/QCD_a.root")
+	fb2 = TFile("../output/QCD_d.root")
+	fb3 = TFile("../output/QCD_e.root")
+
+	f_f1 = TFile("../output/float/"+model+"_MC_"+str(m)+"_mc16a_dummy.root")
+	f_f2 = TFile("../output/float/"+model+"_MC_"+str(m)+"_mc16d_dummy.root")
+	f_f3 = TFile("../output/float/"+model+"_MC_"+str(m)+"_mc16e_dummy.root")
+	f_fb1 = TFile("../output/float/QCD_a.root")
+	f_fb2 = TFile("../output/float/QCD_d.root")
+	f_fb3 = TFile("../output/float/QCD_e.root")
+	#i_HistMjj_JJ_1, i_HistMjj_JJ_b1 ,i_HistMjj_GJ_1, i_HistMjj_GJ_b1 , i_HistMjj_GG_1, i_HistMjj_GG_b1 = getYields("../output/"+model+"_MC_"+str(m)+"_mc16a_dummy.root","../output/"+model+"_MC_"+str(m)+"_mc16d_dummy.root","../output/"+model+"_MC_"+str(m)+"_mc16e_dummy.root","../output/QCD_a.root","../output/QCD_d.root","../output/QCD_e.root",model)
+#	f_HistMjj_JJ_1,f_HistMjj_JJ_b1, f_HistMjj_GJ_1, f_HistMjj_GJ_b1 , f_HistMjj_GG_1, f_HistMjj_GG_b1 = getYields("../output/float/"+model+"_MC_"+str(m)+"_mc16a_dummy.root","../output/float/"+model+"_MC_"+str(m)+"_mc16d_dummy.root","../output/float/"+model+"_MC_"+str(m)+"_mc16e_dummy.root","../output/float/QCD_a.root","../output/float/QCD_d.root","../output/float/QCD_e.root",model)
 
 	HistMjj_JJ_1 = f1.Get("HistMjj")
 	HistMjj_JJ_2 = f2.Get("HistMjj")
@@ -75,9 +195,27 @@ def getYields(a,d,e,ba,bd,be,fmodel):
 	cutflow_weight_1 = f1.Get("cutflow_weight")
 	cutflow_weight_2 = f2.Get("cutflow_weight")
 	cutflow_weight_3 = f3.Get("cutflow_weight")
+# float
+	f_HistMjj_GJ_1 = f_f1.Get("HistMjj_GJ")
+	f_HistMjj_GJ_2 = f_f2.Get("HistMjj_GJ")
+	f_HistMjj_GJ_3 = f_f3.Get("HistMjj_GJ")
+	f_HistMjj_GJ_b1 = f_fb1.Get("HistMjj_GJ")
+	f_HistMjj_GJ_b2 = f_fb2.Get("HistMjj_GJ")
+	f_HistMjj_GJ_b3 = f_fb3.Get("HistMjj_GJ")
+
+	f_HistMjj_GG_1 = f_f1.Get("HistMjj_GG")
+	f_HistMjj_GG_2 = f_f2.Get("HistMjj_GG")
+	f_HistMjj_GG_3 = f_f3.Get("HistMjj_GG")
+	f_HistMjj_GG_b1 = f_fb1.Get("HistMjj_GG")
+	f_HistMjj_GG_b2 = f_fb2.Get("HistMjj_GG")
+	f_HistMjj_GG_b3 = f_fb3.Get("HistMjj_GG")
+
+	f_cutflow_weight_1 = f_f1.Get("cutflow_weight")
+	f_cutflow_weight_2 = f_f2.Get("cutflow_weight")
+	f_cutflow_weight_3 = f_f3.Get("cutflow_weight")
 
 	xs = 0.
-	if fmodel == "String":
+	if model == "String":
 		if m == 7000:
 			xs=7.09
 		elif m == 7500:
@@ -88,64 +226,19 @@ def getYields(a,d,e,ba,bd,be,fmodel):
 			xs=1e-1
 		elif m == 9000:
 			xs=1.99e-2
-#for JJ
-	HistMjj_JJ_1.Scale(xs*36.20766/cutflow_weight_1.GetBinContent(1))
-	HistMjj_JJ_2.Scale(xs*44.3074/cutflow_weight_2.GetBinContent(1))
-	HistMjj_JJ_3.Scale(xs*58.4501/cutflow_weight_3.GetBinContent(1))
 
-	HistMjj_JJ_b1.Scale(36.20766)
-	HistMjj_JJ_b2.Scale(44.3074)
-	HistMjj_JJ_b3.Scale(58.4501)
-
-	HistMjj_JJ_1.Add(HistMjj_JJ_2)
-	HistMjj_JJ_1.Add(HistMjj_JJ_3)
-
-	HistMjj_JJ_b1.Add(HistMjj_JJ_b2)
-	HistMjj_JJ_b1.Add(HistMjj_JJ_b3)
-
-#for GJ
-	HistMjj_GJ_1.Scale(xs*36.20766/cutflow_weight_1.GetBinContent(1))
-	HistMjj_GJ_2.Scale(xs*44.3074/cutflow_weight_2.GetBinContent(1))
-	HistMjj_GJ_3.Scale(xs*58.4501/cutflow_weight_3.GetBinContent(1))
-
-	HistMjj_GJ_b1.Scale(36.20766)
-	HistMjj_GJ_b2.Scale(44.3074)
-	HistMjj_GJ_b3.Scale(58.4501)
-
-	HistMjj_GJ_1.Add(HistMjj_GJ_2)
-	HistMjj_GJ_1.Add(HistMjj_GJ_3)
-
-	HistMjj_GJ_b1.Add(HistMjj_GJ_b2)
-	HistMjj_GJ_b1.Add(HistMjj_GJ_b3)
-
-#for GG
-	HistMjj_GG_1.Scale(xs*36.20766/cutflow_weight_1.GetBinContent(1))
-	HistMjj_GG_2.Scale(xs*44.3074/cutflow_weight_2.GetBinContent(1))
-	HistMjj_GG_3.Scale(xs*58.4501/cutflow_weight_3.GetBinContent(1))
-
-	HistMjj_GG_b1.Scale(36.20766)
-	HistMjj_GG_b2.Scale(44.3074)
-	HistMjj_GG_b3.Scale(58.4501)
-
-	HistMjj_GG_1.Add(HistMjj_GG_2)
-	HistMjj_GG_1.Add(HistMjj_GG_3)
-
-	HistMjj_GG_b1.Add(HistMjj_GG_b2)
-	HistMjj_GG_b1.Add(HistMjj_GG_b3)
-
-	return HistMjj_JJ_1, HistMjj_JJ_b1, HistMjj_GJ_1, HistMjj_GJ_b1 ,HistMjj_GG_1, HistMjj_GG_b1
-
-for m in range(7000,9500,500):
-	
-	i_HistMjj_JJ_1, i_HistMjj_JJ_b1 ,i_HistMjj_GJ_1, i_HistMjj_GJ_b1 , i_HistMjj_GG_1, i_HistMjj_GG_b1 = getYields("../output/"+model+"_MC_"+str(m)+"_mc16a_dummy.root","../output/"+model+"_MC_"+str(m)+"_mc16d_dummy.root","../output/"+model+"_MC_"+str(m)+"_mc16e_dummy.root","../output/QCD_a.root","../output/QCD_d.root","../output/QCD_e.root",model)
-	f_HistMjj_JJ_1,f_HistMjj_JJ_b1, f_HistMjj_GJ_1, f_HistMjj_GJ_b1 , f_HistMjj_GG_1, f_HistMjj_GG_b1 = getYields("../output/float/"+model+"_MC_"+str(m)+"_mc16a_dummy.root","../output/float/"+model+"_MC_"+str(m)+"_mc16d_dummy.root","../output/float/"+model+"_MC_"+str(m)+"_mc16e_dummy.root","../output/float/QCD_a.root","../output/float/QCD_d.root","../output/float/QCD_e.root",model)
-
+	i_HistMjj_JJ_1, i_HistMjj_JJ_b1 = getScale(HistMjj_JJ_1,HistMjj_JJ_2,HistMjj_JJ_3,cutflow_weight_1,cutflow_weight_2,cutflow_weight_3,HistMjj_JJ_b1,HistMjj_JJ_b2, HistMjj_JJ_b3, xs)
+	i_HistMjj_GJ_1, i_HistMjj_GJ_b1 = getScale(HistMjj_GJ_1,HistMjj_GJ_2,HistMjj_GJ_3,cutflow_weight_1,cutflow_weight_2,cutflow_weight_3,HistMjj_GJ_b1,HistMjj_GJ_b2, HistMjj_GJ_b3, xs)
+	i_HistMjj_GG_1, i_HistMjj_GG_b1 = getScale(HistMjj_GG_1,HistMjj_GG_2,HistMjj_GG_3,cutflow_weight_1,cutflow_weight_2,cutflow_weight_3,HistMjj_GG_b1,HistMjj_GG_b2, HistMjj_GG_b3, xs)
+	# float
+	f_f_HistMjj_GJ_1, f_f_HistMjj_GJ_b1 = getScale(f_HistMjj_GJ_1,f_HistMjj_GJ_2,f_HistMjj_GJ_3,f_cutflow_weight_1,f_cutflow_weight_2,f_cutflow_weight_3,f_HistMjj_GJ_b1,f_HistMjj_GJ_b2, f_HistMjj_GJ_b3, xs)
+	f_f_HistMjj_GG_1, f_f_HistMjj_GG_b1 = getScale(f_HistMjj_GG_1,f_HistMjj_GG_2,f_HistMjj_GG_3,f_cutflow_weight_1,f_cutflow_weight_2,f_cutflow_weight_3,f_HistMjj_GG_b1,f_HistMjj_GG_b2, f_HistMjj_GG_b3, xs)
 # get the sigma of 	
 	Sig_JJ = getSigma(i_HistMjj_JJ_1,i_HistMjj_JJ_b1, Sig_JJ) 
 	Sig_GJ = getSigma(i_HistMjj_GJ_1,i_HistMjj_GJ_b1, Sig_GJ) 
 	Sig_GG = getSigma(i_HistMjj_GG_1,i_HistMjj_GG_b1, Sig_GG) 
-	f_Sig_GJ = getSigma(f_HistMjj_GJ_1,f_HistMjj_GJ_b1, f_Sig_GJ) 
-	f_Sig_GG = getSigma(f_HistMjj_GG_1, f_HistMjj_GG_b1, f_Sig_GG) 
+	f_Sig_GJ = getSigma(f_f_HistMjj_GJ_1,f_f_HistMjj_GJ_b1, f_Sig_GJ) 
+	f_Sig_GG = getSigma(f_f_HistMjj_GG_1, f_f_HistMjj_GG_b1, f_Sig_GG) 
 
 
 fout = TFile("../output/float/"+model+".root","recreate")
@@ -175,15 +268,15 @@ leg.AddEntry(f_Sig_GJ,"GJ (float)","l")
 leg.AddEntry(Sig_GG,"GG (int)","l")
 leg.AddEntry(f_Sig_GG,"GG (float)","l")
 
-myText(0.18,0.84,"#it{#bf{#scale[1.8]{#bf{ATLAS} Simulation Internal}}}")
-myText(0.18,0.80,"#bf{#scale[1.5]{#sqrt{s} = 13 TeV}}")
-
-
 Sig_GJ.Draw("PC")
+Sig_JJ.Draw("samePC")
 Sig_GG.Draw("samePC")
 f_Sig_GJ.Draw("samePC")
 f_Sig_GG.Draw("samePC")
 leg.Draw()
+
+myText(0.18,0.84,"#it{#bf{#scale[1.8]{#bf{ATLAS} Simulation Internal}}}")
+myText(0.18,0.80,"#bf{#scale[1.5]{#sqrt{s} = 13 TeV}}")
 
 c.SaveAs("../output/float/"+model+".pdf")
 

@@ -27,7 +27,7 @@ double binLowPtGeV[] = {15. ,20. ,25. ,35. ,45. ,55. ,70. ,85. ,100. ,116. ,134.
 
 float leadingJetPtMin = 420.;
 float jetPtMin = 150.;
-float etaMax = 2.1;
+float etaMax = 2.;
 float yStarMax = 0.6;
 float mjjMin = 1100;
 string trigger = "HLT_j420";
@@ -110,8 +110,8 @@ int main(int argc,char **argv){
     
     TH1D *Histdeltaeta = getHist("deltaeta", "Histdeltaeta", "deltaeta");
     TH1D *Histdeltaphi = getHist("deltaphi", "Histdeltaphi", "deltaphi");
-    TH1D *Cutflow = new TH1D("cutflow", "cutflow", 9, 0.5, 9.5);
-    TH1D *Cutflow_weight = new TH1D("cutflow_weight", "cutflow_weight", 9, 0.5, 9.5);
+    TH1D *Cutflow = new TH1D("cutflow", "cutflow", 11, 0.5, 11.5);
+    TH1D *Cutflow_weight = new TH1D("cutflow_weight", "cutflow_weight", 11, 0.5, 11.5);
 
     // variables used
     vector<float> *jet_pt = 0, *jet_NumTrkPt500PV = 0, *jet_eta = 0, *jet_phi = 0;
@@ -208,16 +208,19 @@ int main(int argc,char **argv){
                 if ((*jet_pt)[0] <= leadingJetPtMin) continue;
                 Cutflow->Fill(6);
 				Cutflow_weight->Fill(6,w);
-                if (mjj <= mjjMin) continue;
+				if(abs((*jet_phi)[0]-(*jet_phi)[1]) > 1) continue;
                 Cutflow->Fill(7);
 				Cutflow_weight->Fill(7,w);
-                if (abs(yStar) >= yStarMax) continue;
+                if (mjj <= mjjMin) continue;
                 Cutflow->Fill(8);
 				Cutflow_weight->Fill(8,w);
-                if (abs((*jet_eta)[0]) >= etaMax) continue;
-                if (abs((*jet_eta)[1]) >= etaMax) continue;
+                if (abs(yStar) >= yStarMax) continue;
                 Cutflow->Fill(9);
 				Cutflow_weight->Fill(9,w);
+                if (abs((*jet_eta)[0]) >= etaMax) continue;
+                if (abs((*jet_eta)[1]) >= etaMax) continue;
+                Cutflow->Fill(10);
+				Cutflow_weight->Fill(10,w);
                 
                 HistMjj->Fill(mjj, w);
                 HistyStar->Fill(yStar, w);
@@ -309,7 +312,7 @@ int main(int argc,char **argv){
 			delete f, t;
 
 			//TFile *fout = TFile::Open("../output/"+dataset + "_" +mass+"_"+p+"_"+num+".root", "recreate");
-			TFile *fout = TFile::Open("../output/float/"+dataset + "_" +mass+"_"+p+"_"+num+".root", "recreate");
+			TFile *fout = TFile::Open("../output/"+dataset + "_" +mass+"_"+p+"_"+num+".root", "recreate");
 			Cutflow->Write();
 			Cutflow_weight->Write();
 			HistMjj->Write();
@@ -387,7 +390,7 @@ bool getGluonSelection(float pt, float ntrack){
     double value = log(pt);
     //int SigmoidnTrack = (int)(gluonTrackSlope * value + gluonTrackOffset);
     double SigmoidnTrack = gluonTrackSlope * value + gluonTrackOffset;
-    if (ntrack >= SigmoidnTrack) return 1;
+    if (ntrack > SigmoidnTrack) return 1;
     else return 0;
 }
 
