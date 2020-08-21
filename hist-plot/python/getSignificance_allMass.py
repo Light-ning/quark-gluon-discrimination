@@ -19,11 +19,12 @@ def getSigma(fHistMjj, fHistMjj_b, Sig):
 		si = fHistMjj.GetBinContent(j)
 		bi = fHistMjj_b.GetBinContent(j)
 #		print fHistMjj.GetBinCenter(j), si, bi
-		if (si+bi) >= 1. and bi != 0.:
-			sigma += 2*((si+bi)*np.log(1+(si/bi))-si)
-			#Sig.SetBinContent(j,sigma)
-			#print fHistMjj.GetBinCenter(j), " ", si," ", bi, " ", sigma
-			
+		if bi != 0.:
+		#if (si+bi) >= 1. and bi != 0.:
+			sigma = 2*((si+bi)*np.log(1+(si/bi))-si)
+			#sigma += 2*((si+bi)*np.log(1+(si/bi))-si)
+			Sig.SetBinContent(j,sigma)
+			print fHistMjj.GetBinCenter(j), " ", si," ", bi, " ", sigma
 
 	sigma_total = math.sqrt(sigma)	
 	yields = fHistMjj.Integral()
@@ -34,12 +35,12 @@ def getSigma(fHistMjj, fHistMjj_b, Sig):
 	line= str(m)+" & "+str(yields)+" & "+str(sigma_total)+" \\\ "#+str(yields_b)
 	#print line
 	
-	Sig.SetBinContent(Sig.FindBin(m),sigma_total)
+	#Sig.SetBinContent(Sig.FindBin(m),sigma_total)
 
 	return Sig
 
 model = "String"
-Sig_JJ = TH1D("Sig_JJ","",4,6500,9000)
+#Sig_JJ = TH1D("Sig_JJ","",4,6500,9000)
 Sig_GJ = TH1D("Sig_GJ","",4,6500,9000)
 Sig_GG = TH1D("Sig_GG","",4,6500,9000)
 c = TCanvas("c","c",500,500)
@@ -138,45 +139,45 @@ for m in range(7000,9500,500):
 	HistMjj_GG_b1.Add(HistMjj_GG_b3)
 
 # get the sigma of 	
+	Sig_JJ = HistMjj_1.Clone() 
 	Sig_JJ = getSigma(HistMjj_1,HistMjj_b1, Sig_JJ) 
-	Sig_GJ = getSigma(HistMjj_GJ_1,HistMjj_GJ_b1, Sig_GJ) 
-	Sig_GG = getSigma(HistMjj_GG_1,HistMjj_GG_b1, Sig_GG) 
+	#Sig_GJ = getSigma(HistMjj_GJ_1,HistMjj_GJ_b1, Sig_GJ) 
+	#Sig_GG = getSigma(HistMjj_GG_1,HistMjj_GG_b1, Sig_GG) 
 
-#plotting 
-#gROOT.SetStyle("ATLAS")
-gStyle.SetOptStat(0)
-#gPad.DrawFrame(6500,10e-3,9000,10)
-#gStyle.SetOptTitle(kFALSE)
-Sig_GJ.SetTitle("")
-Sig_GJ.SetLineColor(1)
-Sig_GJ.GetXaxis().SetTitle("Mjj [GeV]")
-Sig_GJ.GetYaxis().SetTitle("Significance")
+	#plotting 
+	#gROOT.SetStyle("ATLAS")
+	gStyle.SetOptStat(0)
+	gPad.DrawFrame(6500,10e-3,9000,25)
+	#gStyle.SetOptTitle(kFALSE)
+	Sig_JJ.SetTitle("")
+	Sig_JJ.SetLineColor(1)
+	Sig_JJ.GetXaxis().SetTitle("Mjj [GeV]")
+	Sig_JJ.GetYaxis().SetTitle("Significance")
 
-Sig_GG.SetLineColor(2)
-Sig_JJ.SetLineColor(21)
+	Sig_GG.SetLineColor(2)
+	Sig_GJ.SetLineColor(21)
 
-leg = TLegend(0.63,0.6,0.84,0.75)
-leg.SetTextFont(42)
-leg.SetBorderSize(0)
-leg.SetNColumns(1)
-leg.AddEntry(Sig_JJ,"JJ","l")
-leg.AddEntry(Sig_GJ,"GJ","l")
-leg.AddEntry(Sig_GG,"GG","l")
+	leg = TLegend(0.63,0.6,0.84,0.75)
+	leg.SetTextFont(42)
+	leg.SetBorderSize(0)
+	leg.SetNColumns(1)
+	leg.AddEntry(Sig_JJ,"JJ","l")
+	#leg.AddEntry(Sig_GJ,"GJ","l")
+	#leg.AddEntry(Sig_GG,"GG","l")
 
-Sig_GJ.Draw("PC")
-Sig_JJ.Draw("samePC")
-Sig_GG.Draw("samePC")
-leg.Draw()
+	Sig_JJ.Draw("PC")
+	#Sig_GJ.Draw("samePC")
+	#Sig_GG.Draw("samePC")
+	leg.Draw()
 
-myText(0.18,0.84,"#it{#bf{#scale[1.8]{#bf{ATLAS} Simulation Internal}}}")
-myText(0.18,0.80,"#bf{#scale[1.5]{#sqrt{s} = 13 TeV}}")
+	myText(0.18,0.84,"#it{#bf{#scale[1.8]{#bf{ATLAS} Simulation Internal}}}")
+	myText(0.18,0.80,"#bf{#scale[1.5]{#sqrt{s} = 13 TeV}}")
+	c.SaveAs("../output/"+model+"_"+str(m)+".pdf")
 
-c.SaveAs("../output/"+model+"_"+str(m)+".pdf")
-
-#c.Write()
-#HistMjj_GJ_1.Write()
-#f_Sig_GJ.Write()
-fout.Write()
+	#c.Write()
+	#HistMjj_GJ_1.Write()
+	#f_Sig_GJ.Write()
+	fout.Write()
 fout.Close()
 #outfile.write(line) 
 
