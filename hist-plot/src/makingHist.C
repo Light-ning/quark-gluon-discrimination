@@ -208,7 +208,7 @@ int main(int argc,char **argv){
                 if ((*jet_pt)[0] <= leadingJetPtMin) continue;
                 Cutflow->Fill(6);
 				Cutflow_weight->Fill(6,w);
-				if(abs((*jet_phi)[0]-(*jet_phi)[1]) > 1) continue;
+				if(abs((*jet_phi)[0]-(*jet_phi)[1]) <= 1.) continue;
                 Cutflow->Fill(7);
 				Cutflow_weight->Fill(7,w);
                 if (mjj <= mjjMin) continue;
