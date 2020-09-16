@@ -1,5 +1,6 @@
 # Default target
-default: makingHist drawk draw 
+default: makingHist 
+#default: makingHist drawk draw 
 
 # Rule for makingHist
 makingHist: src/makingHist.C 

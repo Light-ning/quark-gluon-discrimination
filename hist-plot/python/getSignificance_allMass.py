@@ -1,6 +1,13 @@
 from ROOT import *
 import numpy as np
 import math
+from optparse import OptionParser
+parser=OptionParser()
+
+parser.add_option("--model",dest="model",help="",default="String")
+(options,args)=parser.parse_args()
+model=options.model
+
 
 def myText(x,y,text, color = 1):
      l = TLatex()
@@ -23,10 +30,11 @@ def getSigma(fHistMjj, fHistMjj_b, Sig):
 		#if (si+bi) >= 1. and bi != 0.:
 			sigma = 2*((si+bi)*np.log(1+(si/bi))-si)
 			#sigma += 2*((si+bi)*np.log(1+(si/bi))-si)
-			Sig.SetBinContent(j,sigma)
-			print fHistMjj.GetBinCenter(j), " ", si," ", bi, " ", sigma
+			sigma_total = math.sqrt(abs(sigma))
+			Sig.SetBinContent(j,sigma_total)
+			print fHistMjj.GetBinCenter(j), " ", si," ", bi, " ", sigma_total
 
-	sigma_total = math.sqrt(sigma)	
+#	sigma_total = math.sqrt(sigma)	
 	yields = fHistMjj.Integral()
 	yields_b = fHistMjj_b.Integral()
 
@@ -34,21 +42,27 @@ def getSigma(fHistMjj, fHistMjj_b, Sig):
 
 	line= str(m)+" & "+str(yields)+" & "+str(sigma_total)+" \\\ "#+str(yields_b)
 	#print line
-	
 	#Sig.SetBinContent(Sig.FindBin(m),sigma_total)
 
 	return Sig
 
-model = "String"
-#Sig_JJ = TH1D("Sig_JJ","",4,6500,9000)
-Sig_GJ = TH1D("Sig_GJ","",4,6500,9000)
-Sig_GG = TH1D("Sig_GG","",4,6500,9000)
+if model == "String":
+	mRange = range(7000,9500,500)
+else:
+	mRange = [1000]+range(2000,7500,500)
+	
+nBin = len(mRange)
+Bmin = mRange[0]
+Bmax = mRange[-1]
+
+#Sig_JJ = TH1D("Sig_JJ","",nBin,Bmin,9000)
+#Sig_GJ = TH1D("Sig_GJ","",nBin,Bmin,9000)
+#Sig_GG = TH1D("Sig_GG","",nBin,Bmin,9000)
 c = TCanvas("c","c",500,500)
 fout = TFile("../output/"+model+".root","recreate")
 
 
-
-for m in range(7000,9500,500):
+for m in mRange:
 	
 	print m
 	f1 = TFile("../output/"+model+"_MC_"+str(m)+"_mc16a_dummy.root")
@@ -86,7 +100,7 @@ for m in range(7000,9500,500):
 	xs = 0.
 	if model == "String":
 		if m == 7000:
-			xs=7.09
+			xs=7.09   # fb-1
 		elif m == 7500:
 			xs=1.86
 		elif m == 8000:
@@ -95,6 +109,31 @@ for m in range(7000,9500,500):
 			xs=1e-1
 		elif m == 9000:
 			xs=1.99e-2
+	elif model == "Hprime":
+		if m == 1000:
+			xs=2.6812e-1
+		elif m == 2000:
+			xs=2.8351e-5
+		elif m == 2500:
+			xs=1.0958e-6
+		elif m == 3000:
+			xs=6.53e-8
+		elif m == 3500:
+			xs=5.16e-9
+		elif m == 4000:
+			xs=4.9157e-10
+		elif m == 4500:
+			xs=5.3629e-11
+		elif m == 5000:
+			xs=6.3479e-12
+		elif m == 5500:
+			xs=7.999e-13
+		elif m == 6000:
+			xs=1.0483e-13
+		elif m == 6500:
+			xs=1.39e-14
+		elif m == 7000:
+			xs=1.855e-15
 
 	HistMjj_1.Scale(xs*36.20766/cutflow_weight_1.GetBinContent(1))
 	HistMjj_2.Scale(xs*44.3074/cutflow_weight_2.GetBinContent(1))
@@ -147,7 +186,7 @@ for m in range(7000,9500,500):
 	#plotting 
 	#gROOT.SetStyle("ATLAS")
 	gStyle.SetOptStat(0)
-	gPad.DrawFrame(6500,10e-3,9000,25)
+	gPad.DrawFrame(Bmin,10e-3,Bmax,25)
 	#gStyle.SetOptTitle(kFALSE)
 	Sig_JJ.SetTitle("")
 	Sig_JJ.SetLineColor(1)
@@ -157,7 +196,7 @@ for m in range(7000,9500,500):
 	Sig_GG.SetLineColor(2)
 	Sig_GJ.SetLineColor(21)
 
-	leg = TLegend(0.63,0.6,0.84,0.75)
+	leg = TLegend(0.63,0.6,0.83,0.75)
 	leg.SetTextFont(42)
 	leg.SetBorderSize(0)
 	leg.SetNColumns(1)
@@ -170,7 +209,7 @@ for m in range(7000,9500,500):
 	#Sig_GG.Draw("samePC")
 	leg.Draw()
 
-	myText(0.18,0.84,"#it{#bf{#scale[1.8]{#bf{ATLAS} Simulation Internal}}}")
+	myText(0.18,0.85,"#it{#bf{#scale[1.8]{#bf{ATLAS} Simulation Internal}}}")
 	myText(0.18,0.80,"#bf{#scale[1.5]{#sqrt{s} = 13 TeV}}")
 	c.SaveAs("../output/"+model+"_"+str(m)+".pdf")
 

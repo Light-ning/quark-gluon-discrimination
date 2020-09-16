@@ -27,9 +27,11 @@ double binLowPtGeV[] = {15. ,20. ,25. ,35. ,45. ,55. ,70. ,85. ,100. ,116. ,134.
 
 float leadingJetPtMin = 420.;
 float jetPtMin = 150.;
-float etaMax = 2.;
-float yStarMax = 0.6;
-float mjjMin = 1100;
+float etaMax = 2.1;
+//float yStarMax = 0.8; //for string
+//float mjjMin = 1133;// for string
+float yStarMax = 0.6; // for h prime
+float mjjMin = 1100;// for h prime
 string trigger = "HLT_j420";
 
 double gluonTrackOffset = -7.26742;
@@ -192,35 +194,50 @@ int main(int argc,char **argv){
 				else if (dataset.Contains("MC")) w = weight;
                 
                 vector<string>::iterator location = find(passedTriggers->begin(), passedTriggers->end(), trigger);
-                Cutflow->Fill(1);
-				Cutflow_weight->Fill(1,w);
-                Cutflow->Fill(2);
-				Cutflow_weight->Fill(2,w);
-                if ((*jet_clean_passLooseBad)[0] == 0) continue;
-                if ((*jet_clean_passLooseBad)[1] == 0) continue;
-                Cutflow->Fill(3);
-				Cutflow_weight->Fill(3,w);
-                if (location == passedTriggers->end()) continue;
-                Cutflow->Fill(4);
-				Cutflow_weight->Fill(4,w);
-                Cutflow->Fill(5);
-				Cutflow_weight->Fill(5,w);
-                if ((*jet_pt)[0] <= leadingJetPtMin) continue;
-                Cutflow->Fill(6);
-				Cutflow_weight->Fill(6,w);
 				if(abs((*jet_phi)[0]-(*jet_phi)[1]) <= 1.) continue;
-                Cutflow->Fill(7);
-				Cutflow_weight->Fill(7,w);
-                if (mjj <= mjjMin) continue;
-                Cutflow->Fill(8);
-				Cutflow_weight->Fill(8,w);
-                if (abs(yStar) >= yStarMax) continue;
-                Cutflow->Fill(9);
-				Cutflow_weight->Fill(9,w);
+				Cutflow->Fill(1);
+				Cutflow_weight->Fill(1,w);
+				if (abs(yStar) >= yStarMax) continue; 
+				Cutflow->Fill(2);
+				Cutflow_weight->Fill(2,w);
+				if (mjj <= mjjMin) continue;
+				Cutflow->Fill(3);
+				Cutflow_weight->Fill(3,w);
                 if (abs((*jet_eta)[0]) >= etaMax) continue;
                 if (abs((*jet_eta)[1]) >= etaMax) continue;
-                Cutflow->Fill(10);
-				Cutflow_weight->Fill(10,w);
+                Cutflow->Fill(4);
+				Cutflow_weight->Fill(4,w);
+				
+
+                //Cutflow->Fill(1);
+				//Cutflow_weight->Fill(1,w);
+                //Cutflow->Fill(2);
+				//Cutflow_weight->Fill(2,w);
+                //if ((*jet_clean_passLooseBad)[0] == 0) continue;
+                //if ((*jet_clean_passLooseBad)[1] == 0) continue;
+                //Cutflow->Fill(3);
+				//Cutflow_weight->Fill(3,w);
+                //if (location == passedTriggers->end()) continue;
+                //Cutflow->Fill(4);
+				//Cutflow_weight->Fill(4,w);
+                //Cutflow->Fill(5);
+				//Cutflow_weight->Fill(5,w);
+                //if ((*jet_pt)[0] <= leadingJetPtMin) continue;
+                //Cutflow->Fill(6);
+				//Cutflow_weight->Fill(6,w);
+				//if(abs((*jet_phi)[0]-(*jet_phi)[1]) <= 1.) continue;
+                //Cutflow->Fill(7);
+				//Cutflow_weight->Fill(7,w);
+                //if (mjj <= mjjMin) continue;
+                //Cutflow->Fill(8);
+				//Cutflow_weight->Fill(8,w);
+                //if (abs(yStar) >= yStarMax) continue;
+                //Cutflow->Fill(9);
+				//Cutflow_weight->Fill(9,w);
+                //if (abs((*jet_eta)[0]) >= etaMax) continue;
+                //if (abs((*jet_eta)[1]) >= etaMax) continue;
+                //Cutflow->Fill(10);
+				//Cutflow_weight->Fill(10,w);
                 
                 HistMjj->Fill(mjj, w);
                 HistyStar->Fill(yStar, w);
@@ -312,7 +329,7 @@ int main(int argc,char **argv){
 			delete f, t;
 
 			//TFile *fout = TFile::Open("../output/"+dataset + "_" +mass+"_"+p+"_"+num+".root", "recreate");
-			TFile *fout = TFile::Open("../output/"+dataset + "_" +mass+"_"+p+"_"+num+".root", "recreate");
+			TFile *fout = TFile::Open("../output/06/"+dataset + "_" +mass+"_"+p+"_"+num+".root", "recreate");
 			Cutflow->Write();
 			Cutflow_weight->Write();
 			HistMjj->Write();
